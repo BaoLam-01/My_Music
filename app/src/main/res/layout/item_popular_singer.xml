@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/_80sdp"
+    android:layout_height="@dimen/_90sdp"
+    android:background="@drawable/item_artist_rounded"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:padding="@dimen/_5sdp"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:src="@drawable/artist_1"
+        android:layout_weight="1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_14sdp"
+        android:textStyle="bold"
+        android:lines="2"
+        android:ellipsize="end"
+        android:textAlignment="center"
+        android:text="@string/tv_artist_name"
+        android:layout_weight="1" />
+
+
+</LinearLayout>

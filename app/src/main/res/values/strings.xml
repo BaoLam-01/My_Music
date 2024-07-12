@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">My Music</string>
+    <string name="discover">Discover</string>
+    <string name="liked">Liked</string>
+    <string name="playlists">Playlists</string>
+    <string name="settings">Settings</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="_1_40">-1:40</string>
+    <string name="song_name">Hidup seperti ini</string>
+    <string name="artist_name">James adam</string>
+    <string name="toolbar_title">Good morning Lam!</string>
+    <string name="tv_title_made_for_you">Made for you</string>
+    <string name="tv_see_all">See all</string>
+    <string name="tv_title_popular_singer">Popular singer</string>
+    <string name="tv_title_popular_song">Popular song</string>
+    <string name="tv_title_recently">Just released recently</string>
+    <string name="tv_artist_name">Nugroho alis</string>
+</resources>
