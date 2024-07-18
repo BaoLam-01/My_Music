@@ -1,18 +1,31 @@
 package com.lampro.mymusic.views.fragments;
 
+import android.app.Application;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.lampro.mymusic.R;
+import com.lampro.mymusic.adapters.MadeForYouAdapter;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentDiscoverBinding;
+import com.lampro.mymusic.model.MadeForYou;
+import com.lampro.mymusic.viewmodels.discoverviewmodel.DiscoverViewModel;
+import com.lampro.mymusic.viewmodels.discoverviewmodel.DiscoverViewModelFactory;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +40,8 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
     private String mParam1;
     private String mParam2;
 
+    private DiscoverViewModel mDiscoverViewModel;
+    private MadeForYouAdapter madeForYouAdapter;
     public DiscoverFragment() {
         // Required empty public constructor
     }
@@ -57,5 +72,34 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+        initViewModel();
+        initView();
+
+
+        mDiscoverViewModel.liveDataMadeForYou.observe(getViewLifecycleOwner(), new Observer<List<MadeForYou>>() {
+
+            @Override
+            public void onChanged(List<MadeForYou> madeForYous) {
+                madeForYouAdapter.updateData(madeForYous);
+            }
+        });
+
+    }
+
+    public void initViewModel() {
+        if (getActivity() != null) {
+            Application application = getActivity().getApplication();
+            DiscoverViewModelFactory discoverViewModelFactory = new DiscoverViewModelFactory(application);
+            mDiscoverViewModel = new ViewModelProvider(this, discoverViewModelFactory).get(DiscoverViewModel.class);
+        }
+    }
+    public void initView() {
+        mDiscoverViewModel.getDataMadeForYou();
+        madeForYouAdapter = new MadeForYouAdapter();
+        binding.rvMadeForYou.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvMadeForYou.setAdapter(madeForYouAdapter);
+
     }
 }
