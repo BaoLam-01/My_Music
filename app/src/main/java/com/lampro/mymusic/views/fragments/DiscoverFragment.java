@@ -6,22 +6,22 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
-import com.lampro.mymusic.R;
 import com.lampro.mymusic.adapters.MadeForYouAdapter;
+import com.lampro.mymusic.adapters.PopularSingerAdapter;
+import com.lampro.mymusic.adapters.PopularSongAdapter;
+import com.lampro.mymusic.adapters.RecentlySongAdapter;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentDiscoverBinding;
-import com.lampro.mymusic.model.MadeForYou;
+import com.lampro.mymusic.model.Playlist;
+import com.lampro.mymusic.model.Singer;
+import com.lampro.mymusic.model.Song;
+import com.lampro.mymusic.utils.CustomItemDecoration;
 import com.lampro.mymusic.viewmodels.discoverviewmodel.DiscoverViewModel;
 import com.lampro.mymusic.viewmodels.discoverviewmodel.DiscoverViewModelFactory;
 
@@ -42,6 +42,12 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
 
     private DiscoverViewModel mDiscoverViewModel;
     private MadeForYouAdapter madeForYouAdapter;
+    private PopularSingerAdapter popularSingerAdapter;
+    private PopularSongAdapter popularSongAdapter;
+    private RecentlySongAdapter recentlySongAdapter;
+
+
+
     public DiscoverFragment() {
         // Required empty public constructor
     }
@@ -78,11 +84,32 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
         initView();
 
 
-        mDiscoverViewModel.liveDataMadeForYou.observe(getViewLifecycleOwner(), new Observer<List<MadeForYou>>() {
+        mDiscoverViewModel.liveDataMadeForYou.observe(getViewLifecycleOwner(), new Observer<List<Playlist>>() {
 
             @Override
-            public void onChanged(List<MadeForYou> madeForYous) {
+            public void onChanged(List<Playlist> madeForYous) {
                 madeForYouAdapter.updateData(madeForYous);
+            }
+        });
+
+        mDiscoverViewModel.liveDataPopularSinger.observe(getViewLifecycleOwner(), new Observer<List<Singer>>() {
+            @Override
+            public void onChanged(List<Singer> popularSingers) {
+               popularSingerAdapter.updateData(popularSingers);
+            }
+        });
+
+        mDiscoverViewModel.liveDataPopularSong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
+            @Override
+            public void onChanged(List<Song> popularSongs) {
+               popularSongAdapter.updateData(popularSongs);
+            }
+        });
+
+        mDiscoverViewModel.liveDataRecentlySong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
+            @Override
+            public void onChanged(List<Song> recentlySongs) {
+               recentlySongAdapter.updateData(recentlySongs);
             }
         });
 
@@ -96,10 +123,32 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
         }
     }
     public void initView() {
-        mDiscoverViewModel.getDataMadeForYou();
+        int marginInPx = getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._12sdp);
+        CustomItemDecoration customItemDecoration = new CustomItemDecoration(marginInPx);
+
+
+        mDiscoverViewModel.setDataMadeForYou();
         madeForYouAdapter = new MadeForYouAdapter();
         binding.rvMadeForYou.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvMadeForYou.addItemDecoration(customItemDecoration);
         binding.rvMadeForYou.setAdapter(madeForYouAdapter);
 
+        mDiscoverViewModel.setDataPopularSinger();
+        popularSingerAdapter = new PopularSingerAdapter();
+        binding.rvPopularSinger.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvPopularSinger.addItemDecoration(customItemDecoration);
+        binding.rvPopularSinger.setAdapter(popularSingerAdapter);
+
+        mDiscoverViewModel.setDataPopularSong();
+        popularSongAdapter = new PopularSongAdapter();
+        binding.rvPopularSong.setLayoutManager(new LinearLayoutManager(this.getContext(),LinearLayoutManager.HORIZONTAL,false));
+        binding.rvPopularSong.addItemDecoration(customItemDecoration);
+        binding.rvPopularSong.setAdapter(popularSongAdapter);
+
+        mDiscoverViewModel.setDataRecentlySong();
+        recentlySongAdapter = new RecentlySongAdapter();
+        binding.rvRecently.setLayoutManager(new LinearLayoutManager(this.getContext(),LinearLayoutManager.VERTICAL,false));
+//        binding.rvRecently.addItemDecoration(customItemDecoration);
+        binding.rvRecently.setAdapter(recentlySongAdapter);
     }
 }

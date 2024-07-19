@@ -1,13 +1,13 @@
 package com.lampro.mymusic.model;
 
-public class MadeForYou {
-    public int img;
-    public String title, content;
+public class Playlist {
+    private int img;
+    private String title, Singers;
 
-    public MadeForYou(int img, String title, String content) {
+    public Playlist(int img, String title, String Singers) {
         this.img = img;
         this.title = title;
-        this.content = content;
+        this.Singers = Singers;
     }
 
 
@@ -27,11 +27,11 @@ public class MadeForYou {
         this.title = title;
     }
 
-    public String getContent() {
-        return content;
+    public String getSingers() {
+        return Singers;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setSingers(String singers) {
+        this.Singers = singers;
     }
 }

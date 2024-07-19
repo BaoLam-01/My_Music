@@ -15,4 +15,6 @@
     <string name="tv_title_popular_song">Popular song</string>
     <string name="tv_title_recently">Just released recently</string>
     <string name="tv_artist_name">Nugroho alis</string>
+    <string name="em_cua_ngay_hom_qua">Em cua ngay hom qua</string>
+    <string name="son_tung_mtp">Son Tung MTP</string>
 </resources>

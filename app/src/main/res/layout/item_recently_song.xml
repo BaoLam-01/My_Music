@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="itemRecentlySong"
+            type="com.lampro.mymusic.model.Song" />
+
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/item_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_15sdp"
+        android:layout_marginVertical="@dimen/_3sdp"
+        android:background="@drawable/item_recently_rounded"
+        android:gravity="center_vertical">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cv_img"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/_5sdp"
+            app:cardCornerRadius="@dimen/_5sdp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                imageUrl="@{itemRecentlySong.img}"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/em_cua_ngay_hom_qua" />
+        </androidx.cardview.widget.CardView>
+
+        <LinearLayout
+            android:id="@+id/ll_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/_5sdp"
+            android:layout_toRightOf="@id/cv_img"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold"
+                android:text="@{itemRecentlySong.name}"
+                tools:text="@string/em_cua_ngay_hom_qua" />
+
+
+            <TextView
+                android:id="@+id/tv_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:text="@{itemRecentlySong.artist}"
+                tools:text="@string/son_tung_mtp" />
+        </LinearLayout>
+
+        <ImageView
+            android:visibility="invisible"
+            android:id="@+id/btn_start"
+            imageUrl="@drawable/pause"
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_20sdp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/_5sdp"
+            android:layout_marginRight="@dimen/_10sdp"
+            android:scaleType="fitCenter"
+            android:text="sadfhi"
+            tools:src="@drawable/pause" />
+
+
+    </RelativeLayout>
+</layout>

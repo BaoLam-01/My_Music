@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/_60sdp"
             android:layout_above="@id/nav_bottom"
-            android:layout_marginHorizontal="@dimen/_15sdp"
+            android:layout_marginHorizontal="@dimen/_10sdp"
             android:layout_marginBottom="@dimen/_10sdp"
             android:background="@drawable/music_playing_frame"
             android:orientation="vertical">

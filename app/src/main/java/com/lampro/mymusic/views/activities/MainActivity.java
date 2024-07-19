@@ -36,6 +36,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         ViewPager2 vpContent = binding.vpContent;
         vpContent.setAdapter(new ViewPagerAdapter(this));
         vpContent.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+        vpContent.setUserInputEnabled(false);
 
         BottomNavigationView navigationView = binding.navBottom;
         navigationView.setOnItemSelectedListener(v -> {
