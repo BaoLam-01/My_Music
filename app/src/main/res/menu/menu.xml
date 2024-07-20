@@ -6,8 +6,8 @@
         android:title="@string/discover" />
     <item
         android:id="@+id/liked"
-        android:icon="@drawable/liked"
-        android:title="@string/liked" />
+        android:icon="@drawable/search"
+        android:title="Search" />
     <item
         android:id="@+id/playlist"
         android:icon="@drawable/playlist"
