@@ -88,8 +88,6 @@ public class DiscoverViewModel extends AndroidViewModel {
         data.add(new Song(R.drawable.co_chang_trai_viet_len_cay,"Co chang trai viet len cay", "Phan Manh Quynh"));
         data.add(new Song(R.drawable.nguoi_khac,"Nguoi khac", "Phan Manh Quynh"));
         data.add(new Song(R.drawable.nguoi_khac,"Nguoi khac", "Phan Manh Quynh"));
-        data.add(new Song(R.drawable.nguoi_khac,"Nguoi khac", "Phan Manh Quynh"));
-        data.add(new Song(R.drawable.nguoi_khac,"Nguoi khac", "Phan Manh Quynh"));
         return data;
     }
 
