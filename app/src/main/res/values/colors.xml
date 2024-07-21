@@ -13,5 +13,6 @@
     <color name="lightgray">#FFC0C0C0</color>
     <color name="transparent">#00000000</color>
     <color name="color_seekbar">#4B8E96</color>
+    <color name="backgorud_color">#DDD4C9</color>
 
 </resources>
