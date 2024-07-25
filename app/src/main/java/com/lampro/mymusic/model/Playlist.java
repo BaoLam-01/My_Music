@@ -1,7 +1,7 @@
 package com.lampro.mymusic.model;
 
 public class Playlist {
-    private int img;
+    private int img, songCount;
     private String title, Singers;
 
     public Playlist(int img, String title, String Singers) {
@@ -9,6 +9,13 @@ public class Playlist {
         this.title = title;
         this.Singers = Singers;
     }
+
+    public Playlist(int img, String title, int songCount) {
+        this.img = img;
+        this.title = title;
+        this.songCount = songCount;
+    }
+
 
 
     public int getImg() {
@@ -33,5 +40,13 @@ public class Playlist {
 
     public void setSingers(String singers) {
         this.Singers = singers;
+    }
+
+    public int getSongCount() {
+        return songCount;
+    }
+
+    public void setSongCount(int songCount) {
+        this.songCount = songCount;
     }
 }

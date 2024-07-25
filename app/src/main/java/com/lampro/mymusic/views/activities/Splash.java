@@ -32,7 +32,7 @@ public class Splash extends BaseActivity<ActivitySplashBinding> {
             Intent intent = new Intent(Splash.this, MainActivity.class);
             startActivity(intent);
             finish();
-        },2000);
+        },0000);
     }
 
     @Override

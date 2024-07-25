@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 public class DiscoverViewModelFactory implements ViewModelProvider.Factory {
-    public Application application;
+    private Application application;
 
     public DiscoverViewModelFactory(Application application) {
         this.application = application;

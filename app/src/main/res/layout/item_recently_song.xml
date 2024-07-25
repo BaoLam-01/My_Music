@@ -15,7 +15,6 @@
         android:id="@+id/item_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/_15sdp"
         android:layout_marginVertical="@dimen/_3sdp"
         android:background="@drawable/item_recently_rounded"
         android:gravity="center_vertical">
@@ -51,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:lines="1"
-                android:textSize="@dimen/_14ssp"
+                android:textSize="@dimen/_12ssp"
                 android:textStyle="bold"
                 android:text="@{itemRecentlySong.name}"
                 tools:text="@string/em_cua_ngay_hom_qua" />

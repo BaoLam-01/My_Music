@@ -17,4 +17,18 @@
     <string name="tv_artist_name">Nugroho alis</string>
     <string name="em_cua_ngay_hom_qua">Em cua ngay hom qua</string>
     <string name="son_tung_mtp">Son Tung MTP</string>
+    <string name="podcast">Podcast</string>
+    <string name="playlist">Playlist</string>
+    <string name="name_of_the_song">name of the song</string>
+    <array name="filter_playlist">
+        <item name="podcast">Podcast</item>
+        <item name="playlist">Playlist</item>
+        <item name="album">Album</item>
+        <item name="artist">Artist</item>
+        <item name="downloaded">Downloaded</item>
+    </array>
+    <string-array name="filter_playlist2">
+        <item name="podcast">Podcast</item>
+    </string-array>
+
 </resources>

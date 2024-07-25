@@ -127,26 +127,26 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
         CustomItemDecoration customItemDecoration = new CustomItemDecoration(marginInPx);
 
 
-        mDiscoverViewModel.setDataMadeForYou();
         madeForYouAdapter = new MadeForYouAdapter();
+        mDiscoverViewModel.setDataMadeForYou();
         binding.rvMadeForYou.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvMadeForYou.addItemDecoration(customItemDecoration);
         binding.rvMadeForYou.setAdapter(madeForYouAdapter);
 
-        mDiscoverViewModel.setDataPopularSinger();
         popularSingerAdapter = new PopularSingerAdapter();
+        mDiscoverViewModel.setDataPopularSinger();
         binding.rvPopularSinger.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvPopularSinger.addItemDecoration(customItemDecoration);
         binding.rvPopularSinger.setAdapter(popularSingerAdapter);
 
-        mDiscoverViewModel.setDataPopularSong();
         popularSongAdapter = new PopularSongAdapter();
+        mDiscoverViewModel.setDataPopularSong();
         binding.rvPopularSong.setLayoutManager(new LinearLayoutManager(this.getContext(),LinearLayoutManager.HORIZONTAL,false));
         binding.rvPopularSong.addItemDecoration(customItemDecoration);
         binding.rvPopularSong.setAdapter(popularSongAdapter);
 
-        mDiscoverViewModel.setDataRecentlySong();
         recentlySongAdapter = new RecentlySongAdapter();
+        mDiscoverViewModel.setDataRecentlySong();
         binding.rvRecently.setLayoutManager(new LinearLayoutManager(this.getContext(),LinearLayoutManager.VERTICAL,false));
 //        binding.rvRecently.addItemDecoration(customItemDecoration);
         binding.rvRecently.setAdapter(recentlySongAdapter);
