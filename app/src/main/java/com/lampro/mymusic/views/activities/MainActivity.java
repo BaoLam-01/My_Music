@@ -66,15 +66,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if ( result.getResultCode() == RESULT_OK){
+                        if ( result.getResultCode() == RESULT_CANCELED){
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                if (Environment.isExternalStorageManager()) {
+                                    onRequestPermission.onRequestSuccess();
 
-                            onRequestPermission.onRequestSuccess();
+                                }
+                            } else {
+                                // Các quyền khác cho Android dưới 11
+                                if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                                        == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_AUDIO)
+                                        == PackageManager.PERMISSION_GRANTED) {
+                                    onRequestPermission.onRequestSuccess();
+                                }
+                            }
                         }
-//                        if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-//                                == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_AUDIO)
-//                                == PackageManager.PERMISSION_GRANTED) {
-//                            // Xử lý kết quả ở đây
-//                        }
+//
                     }
                 }
         );
@@ -143,7 +150,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                 getResult.launch(intent);
-
             } else {
                 onRequestPermission.onRequestSuccess();
             }

@@ -133,24 +133,24 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     }
 
 
-    @Override
-    public void onStart() {
-        super.onStart();
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+////
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//            if (Environment.isExternalStorageManager()) {
+//                onRequestSuccess();
 //
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (Environment.isExternalStorageManager()) {
-                onRequestSuccess();
-
-            }
-        } else {
-            // Các quyền khác cho Android dưới 11
-            if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_MEDIA_AUDIO)
-                    == PackageManager.PERMISSION_GRANTED) {
-                onRequestSuccess();
-            }
-        }
-    }
+//            }
+//        } else {
+//            // Các quyền khác cho Android dưới 11
+//            if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+//                    == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_MEDIA_AUDIO)
+//                    == PackageManager.PERMISSION_GRANTED) {
+//                onRequestSuccess();
+//            }
+//        }
+//    }
 
 
     private void initview() {
