@@ -80,9 +80,8 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/_10sdp"
-                        android:gravity="center_vertical"
-                        android:paddingBottom="@dimen/_5sdp">
+                        android:gravity="center_vertical">
+
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -103,7 +102,7 @@
                             android:layout_marginRight="@dimen/_10sdp"
                             android:layout_toLeftOf="@id/img_play"
                             android:src="@drawable/shuffle"
-                            app:tint="@color/backgorud_color" />
+                            app:tint="@color/backgorud_color_2" />
 
                         <ImageView
                             android:id="@+id/img_play"
@@ -112,6 +111,8 @@
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:layout_marginRight="@dimen/_15sdp"
+                            android:layout_marginTop="@dimen/_10sdp"
+                            android:layout_marginBottom="@dimen/_5sdp"
                             android:adjustViewBounds="true"
                             android:background="@drawable/background_button_play"
                             android:elevation="@dimen/_3sdp"

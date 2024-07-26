@@ -14,5 +14,6 @@
     <color name="transparent">#00000000</color>
     <color name="color_seekbar">#4B8E96</color>
     <color name="backgorud_color">#FFF5E9</color>
+    <color name="backgorud_color_2">#FEE1A2</color>
 
 </resources>
