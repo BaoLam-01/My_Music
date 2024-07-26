@@ -1,5 +1,6 @@
 package com.lampro.mymusic.utils;
 
+import android.net.Uri;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -23,6 +24,13 @@ public class BindingUtils {
     @BindingAdapter("circleImageUrl")
     public static void loadCircleImg(@NonNull ImageView imageView, int img) {
         Glide.with(imageView.getContext()).load(img).apply(RequestOptions.bitmapTransform(new CircleCrop())).into(imageView);
+
+    }
+
+
+    @BindingAdapter("imageUri")
+    public static void loadUriImg(@NonNull ImageView imageView, Uri uri) {
+        Glide.with(imageView.getContext()).load(uri).centerCrop().placeholder(R.drawable.ic_small_music).into(imageView);
 
     }
 }

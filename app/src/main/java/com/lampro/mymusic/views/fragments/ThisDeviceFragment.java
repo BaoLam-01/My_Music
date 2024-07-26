@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,8 +30,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.lampro.mymusic.adapters.RecentlySongAdapter;
+import com.lampro.mymusic.adapters.ThisDeviceSongAdapter;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentThisDeviceBinding;
+import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Song;
 import com.lampro.mymusic.utils.CustomItemDecoration;
 import com.lampro.mymusic.utils.CustomItemSongDecoration;
@@ -37,6 +41,7 @@ import com.lampro.mymusic.viewmodels.thisdeviceviewmodel.ThisDeviceViewModel;
 import com.lampro.mymusic.viewmodels.thisdeviceviewmodel.ThisDeviceViewModelFactory;
 import com.lampro.mymusic.views.activities.MainActivity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +50,7 @@ import java.util.List;
  * Use the {@link ThisDeviceFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> implements MainActivity.OnRequestPermission {
+public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> implements MainActivity.OnRequestPermission{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -58,7 +63,7 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
 
     private final String TAG = "BAOLAM";
 
-    private RecentlySongAdapter mThisDeviceSong;
+    private ThisDeviceSongAdapter mThisDeviceSong;
     private MainActivity mainActivity;
 
     private ThisDeviceViewModel mThisDeviceViewModel;
@@ -109,7 +114,11 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mThisDeviceSong = new RecentlySongAdapter();
+
+        mainActivity = (MainActivity) getActivity();
+
+
+        mThisDeviceSong = new ThisDeviceSongAdapter(mainActivity);
 
         initview();
 
@@ -123,11 +132,10 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
         });
 
 
-
-
-        mainActivity = (MainActivity) getActivity();
         mainActivity.setCallback(this);
         mainActivity.checkSelfPermission();
+
+
 
 
     }
@@ -176,4 +184,6 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     public void onRequestSuccess() {
         mThisDeviceViewModel.getAllSongs(getContext().getContentResolver());
     }
+
+
 }

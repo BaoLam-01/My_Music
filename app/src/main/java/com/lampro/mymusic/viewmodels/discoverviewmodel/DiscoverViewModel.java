@@ -1,6 +1,7 @@
 package com.lampro.mymusic.viewmodels.discoverviewmodel;
 
 import android.app.Application;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -70,24 +71,24 @@ public class DiscoverViewModel extends AndroidViewModel {
 
     private List<Song> getDataPopularSong() {
         List<Song> data = new ArrayList<>();
-        data.add(new Song(R.drawable.hidupku_indah,"Hidupku indah", "James adam"));
-        data.add(new Song(R.drawable.begitu_adanya,"Begitu adanya", "Nugroho alis"));
-        data.add(new Song(R.drawable.ya_begitulah,"Ya begitulah", "Maria Srinirani"));
-        data.add(new Song(R.drawable.em_cua_ngay_hom_qua,"Em cua ngay hom qua", "Son Tung MTP"));
-        data.add(new Song(R.drawable.thang_tu_la_loi_noi_doi_cua_em,"Thang tu la loi noi doi cua em", "Ha Anh Tuan"));
-        data.add(new Song(R.drawable.la_lung,"La lung", "Vu"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.hidupku_indah),"Hidupku indah", "James adam"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.begitu_adanya),"Begitu adanya", "Nugroho alis"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.ya_begitulah),"Ya begitulah", "Maria Srinirani"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.em_cua_ngay_hom_qua),"Em cua ngay hom qua", "Son Tung MTP"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.thang_tu_la_loi_noi_doi_cua_em),"Thang tu la loi noi doi cua em", "Ha Anh Tuan"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.la_lung),"La lung", "Vu"));
         return data;
     }
 
     private List<Song> getDataRecentlySong() {
         List<Song> data = new ArrayList<>();
-        data.add(new Song(R.drawable.em_cua_ngay_hom_qua,"Em cua ngay hom qua", "Son Tung MTP"));
-        data.add(new Song(R.drawable.la_lung,"La lung", "Vu"));
-        data.add(new Song(R.drawable.diem_xua,"Diem xua", "Trinh Cong Son"));
-        data.add(new Song(R.drawable.dap_vo_cay_dan,"Dap vo cay dan", "Quang Le"));
-        data.add(new Song(R.drawable.co_chang_trai_viet_len_cay,"Co chang trai viet len cay", "Phan Manh Quynh"));
-        data.add(new Song(R.drawable.nguoi_khac,"Nguoi khac", "Phan Manh Quynh"));
-        data.add(new Song(R.drawable.nguoi_khac,"Nguoi khac", "Phan Manh Quynh"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.em_cua_ngay_hom_qua),"Em cua ngay hom qua", "Son Tung MTP"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.la_lung),"La lung", "Vu"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.diem_xua),"Diem xua", "Trinh Cong Son"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.dap_vo_cay_dan),"Dap vo cay dan", "Quang Le"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.co_chang_trai_viet_len_cay),"Co chang trai viet len cay", "Phan Manh Quynh"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.nguoi_khac),"Nguoi khac", "Phan Manh Quynh"));
+        data.add(new Song(Uri.parse("android.resource://" + this + "/" + R.drawable.nguoi_khac),"Nguoi khac", "Phan Manh Quynh"));
         return data;
     }
 

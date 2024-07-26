@@ -8,11 +8,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.SeekBar;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -35,8 +39,12 @@ import com.lampro.mymusic.R;
 import com.lampro.mymusic.adapters.ViewPagerAdapter;
 import com.lampro.mymusic.base.BaseActivity;
 import com.lampro.mymusic.databinding.ActivityMainBinding;
+import com.lampro.mymusic.interfaces.IOnClickItemSong;
+import com.lampro.mymusic.model.Song;
 
-public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener{
+import java.util.List;
+
+public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener, IOnClickItemSong{
 
     public static final int MY_REQUEST_CODE = 10;
 
@@ -45,6 +53,12 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     private OnRequestPermission onRequestPermission;
     private ActivityResultLauncher<Intent> getResult;
+    private MediaPlayer mediaPlayer;
+
+    private Handler handler = new Handler();
+    private Runnable updateSeekBar;
+
+    private boolean isMuted = false;
 
     @Override
     protected ActivityMainBinding inflateBinding() {
@@ -95,6 +109,12 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         vpContent.setUserInputEnabled(false);
 
         navigationView = binding.navBottom;
+
+        if (mediaPlayer == null) {
+            binding.llFramePlaying.setVisibility(View.GONE);
+        }else {
+            binding.llFramePlaying.setVisibility(View.VISIBLE);
+        }
     }
     private void listener() {
         navigationView.setOnItemSelectedListener(v -> {
@@ -117,8 +137,40 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             return true;
         });
 
+
+        binding.seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaPlayer != null) {
+                    mediaPlayer.seekTo(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+
+        updateSeekBar = new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer != null) {
+                    binding.seekbar.setProgress(mediaPlayer.getCurrentPosition());
+                }
+                handler.postDelayed(this, 1000);
+            }
+        };
+
+        binding.tvSongName.setSelected(true);
         binding.cvImgPlaying.setOnClickListener(this);
         binding.llTitlePlaying.setOnClickListener(this);
+        binding.ibtnPause.setOnClickListener(this);
+        binding.ibtnVolume.setOnClickListener(this);
 
     }
 
@@ -129,6 +181,31 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         if (v.getId() == R.id.cv_img_playing || v.getId() == R.id.ll_title_playing) {
             Intent intent = new Intent(MainActivity.this, MusicPlayerActivity.class);
             startActivity(intent);
+        }
+
+        if (v.getId() == R.id.ibtn_volume) {
+            if (mediaPlayer != null) {
+                if (!isMuted) {
+                    mediaPlayer.setVolume(0f,0f);
+                    binding.ibtnVolume.setImageResource(R.drawable.mute);
+                }else {
+                    mediaPlayer.setVolume(1f,1f);
+                    binding.ibtnVolume.setImageResource(R.drawable.volume_high);
+                }
+                isMuted = !isMuted;
+            }
+        }
+        if (v.getId() == R.id.ibtn_pause) {
+            if (mediaPlayer != null) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    binding.ibtnPause.setImageResource(R.drawable.play);
+                } else {
+                    mediaPlayer.start();
+                    binding.ibtnPause.setImageResource(R.drawable.pause);
+                }
+            }
+
         }
     }
 
@@ -192,6 +269,33 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     }
 
+    @Override
+    public void playSong(List<Song> listSong, int position) {
+
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            Uri uriSong = listSong.get(position).getUriSong();
+
+            mediaPlayer = MediaPlayer.create(MainActivity.this, uriSong);
+            mediaPlayer.setVolume(1f,1f);
+            mediaPlayer.setLooping(false);
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    int vt = (position + 1) % listSong.size();
+                    playSong(listSong,vt);
+                }
+            });
+            binding.seekbar.setMax(mediaPlayer.getDuration());
+            mediaPlayer.start();
+            handler.post(updateSeekBar);
+            binding.setSongPlaying(listSong.get(position));
+            binding.llFramePlaying.setVisibility(View.VISIBLE);
+        }
+    }
 
 
     public interface OnRequestPermission {
@@ -230,5 +334,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         }
         managerCompat.notify(1, notification);
 
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+        handler.removeCallbacks(updateSeekBar);
     }
 }

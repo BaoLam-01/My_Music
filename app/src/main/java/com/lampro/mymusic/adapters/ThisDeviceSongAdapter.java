@@ -1,6 +1,6 @@
 package com.lampro.mymusic.adapters;
 
-import android.media.MediaPlayer;
+import android.net.Uri;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -11,11 +11,11 @@ import com.lampro.mymusic.databinding.ItemSongBinding;
 import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Song;
 
-public class RecentlySongAdapter extends BaseRecyclerViewAdapter<Song, ItemSongBinding> {
+public class ThisDeviceSongAdapter  extends BaseRecyclerViewAdapter<Song, ItemSongBinding> {
 
     private IOnClickItemSong iOnClickItemSong;
 
-    public RecentlySongAdapter(IOnClickItemSong iOnClickItemSong) {
+    public ThisDeviceSongAdapter(IOnClickItemSong iOnClickItemSong) {
         this.iOnClickItemSong = iOnClickItemSong;
     }
 
@@ -30,6 +30,7 @@ public class RecentlySongAdapter extends BaseRecyclerViewAdapter<Song, ItemSongB
         holder.binding.itemBody.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                iOnClickItemSong.playSong(mlistAdapter,holder.getAdapterPosition());
             }
         });
     }

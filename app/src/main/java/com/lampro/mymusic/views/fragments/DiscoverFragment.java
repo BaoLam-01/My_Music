@@ -1,6 +1,7 @@
 package com.lampro.mymusic.views.fragments;
 
 import android.app.Application;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ import com.lampro.mymusic.adapters.PopularSongAdapter;
 import com.lampro.mymusic.adapters.RecentlySongAdapter;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentDiscoverBinding;
+import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Playlist;
 import com.lampro.mymusic.model.Singer;
 import com.lampro.mymusic.model.Song;
@@ -32,7 +34,7 @@ import java.util.List;
  * Use the {@link DiscoverFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
+public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> implements IOnClickItemSong {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -145,10 +147,15 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> {
         binding.rvPopularSong.addItemDecoration(customItemDecoration);
         binding.rvPopularSong.setAdapter(popularSongAdapter);
 
-        recentlySongAdapter = new RecentlySongAdapter();
+        recentlySongAdapter = new RecentlySongAdapter(this);
         mDiscoverViewModel.setDataRecentlySong();
         binding.rvRecently.setLayoutManager(new LinearLayoutManager(this.getContext(),LinearLayoutManager.VERTICAL,false));
 //        binding.rvRecently.addItemDecoration(customItemDecoration);
         binding.rvRecently.setAdapter(recentlySongAdapter);
+    }
+
+    @Override
+    public void playSong(List<Song> listSong,int position) {
+
     }
 }

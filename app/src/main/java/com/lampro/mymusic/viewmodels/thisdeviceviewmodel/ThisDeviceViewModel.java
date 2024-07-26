@@ -2,7 +2,10 @@ package com.lampro.mymusic.viewmodels.thisdeviceviewmodel;
 
 import android.app.Application;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -31,7 +34,8 @@ public class ThisDeviceViewModel extends AndroidViewModel {
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.ALBUM,
                 MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA};
+                MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Media.ALBUM_ID};
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
         String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
 
@@ -44,22 +48,39 @@ public class ThisDeviceViewModel extends AndroidViewModel {
         int albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
         int durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
         int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+        int idAlbumColumn= cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
 
 
         do {
-            int img = cursor.getInt(dataColumn);
-            String id = cursor.getString(idColumn);
+
+            Long id = cursor.getLong(idColumn);
+
+            Long albumId = cursor.getLong(idAlbumColumn);
+            Uri img = getAlbumArtUri(albumId);
+
+
             String title = cursor.getString(titleColumn);
             String artist = cursor.getString(artistColumn);
             String album = cursor.getString(albumColumn);
             String duration = cursor.getString(durationColumn);
             String data = cursor.getString(dataColumn);
-            songs.add(new Song(img, id, title, artist, album, duration, data));
+
+            Uri getUri = getSongUri(getApplication(), id);
+
+            songs.add(new Song(img, id, title, artist, album, duration, data, getUri));
 
         } while (cursor.moveToNext());
         liveDataListSong.setValue(songs);
     }
 
+    private Uri getSongUri(Context context, Long songId) {
+        Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        return ContentUris.withAppendedId(contentUri, songId);
+    }
 
+    private Uri getAlbumArtUri(Long albumId) {
+        Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
+        return ContentUris.withAppendedId(albumArtUri, albumId);
+    }
 
 }

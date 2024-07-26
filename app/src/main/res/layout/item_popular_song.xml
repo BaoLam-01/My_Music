@@ -28,8 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_80sdp"
                 android:background="@drawable/item_img_rounded"
-                android:scaleType="centerCrop"
-                imageUrl="@{itemPopularSong.img}"
+                imageUri="@{itemPopularSong.img}"
                 tools:src="@drawable/mfy_indonesian_pops" />
         </androidx.cardview.widget.CardView>
 

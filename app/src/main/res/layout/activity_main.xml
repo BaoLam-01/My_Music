@@ -5,6 +5,10 @@
 
     <data>
 
+        <variable
+            name="songPlaying"
+            type="com.lampro.mymusic.model.Song" />
+
         <import type="com.lampro.mymusic.utils.StringUtils" />
     </data>
 
@@ -58,7 +62,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:scaleType="fitStart"
-                        android:src="@drawable/defaultimgplaying" />
+                        imageUri="@{songPlaying.img}"/>
                 </androidx.cardview.widget.CardView>
 
 
@@ -75,7 +79,15 @@
                         android:id="@+id/tv_song_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/song_name"
+                        tools:text="@string/song_name"
+                        android:lines="1"
+                        android:ellipsize="marquee"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:freezesText="true"
+                        android:text="@{songPlaying.name}"
                         android:textColor="@color/black"
                         android:textStyle="bold" />
 
@@ -83,7 +95,11 @@
                         android:id="@+id/tv_artist_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/artist_name"
+                        tools:text="@string/artist_name"
+                        android:maxWidth="@dimen/_160sdp"
+                        android:lines="1"
+                        android:ellipsize="end"
+                        android:text="@{songPlaying.artist}"
                         android:textSize="@dimen/_10ssp" />
                 </LinearLayout>
 
@@ -132,7 +148,8 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:paddingHorizontal="@dimen/_8sdp"
-                    android:text="@string/_1_40" />
+                    android:text="@{songPlaying.duration}"
+                    tools:text="@string/_1_40" />
 
 
             </RelativeLayout>
