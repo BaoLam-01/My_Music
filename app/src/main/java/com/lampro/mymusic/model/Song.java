@@ -20,6 +20,16 @@ public class Song {
         this.data = data;
     }
 
+    public Song(int img, String id, String name, String artist, String album, String duration, String data) {
+        this.img = img;
+        this.id = id;
+        this.name = name;
+        this.artist = artist;
+        this.album = album;
+        this.duration = duration;
+        this.data = data;
+    }
+
     public int getImg() {
         return img;
     }

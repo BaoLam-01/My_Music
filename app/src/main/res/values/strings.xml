@@ -20,6 +20,10 @@
     <string name="podcast">Podcast</string>
     <string name="playlist">Playlist</string>
     <string name="name_of_the_song">name of the song</string>
+    <string name="is_playing_from_the_list">IS PLAYING FROM THE LIST</string>
+    <string name="open_lirics">Open lirics</string>
+    <string name="xuan_thi">Xuan thi</string>
+    <string name="bui_anh_tuan">Bui Anh Tuan</string>
     <array name="filter_playlist">
         <item name="podcast">Podcast</item>
         <item name="playlist">Playlist</item>

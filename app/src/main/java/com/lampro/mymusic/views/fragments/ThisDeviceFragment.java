@@ -2,6 +2,7 @@ package com.lampro.mymusic.views.fragments;
 
 
 import android.Manifest;
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,12 +23,18 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.lampro.mymusic.adapters.RecentlySongAdapter;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentThisDeviceBinding;
 import com.lampro.mymusic.model.Song;
+import com.lampro.mymusic.utils.CustomItemDecoration;
+import com.lampro.mymusic.utils.CustomItemSongDecoration;
+import com.lampro.mymusic.viewmodels.thisdeviceviewmodel.ThisDeviceViewModel;
+import com.lampro.mymusic.viewmodels.thisdeviceviewmodel.ThisDeviceViewModelFactory;
 import com.lampro.mymusic.views.activities.MainActivity;
 
 import java.util.ArrayList;
@@ -51,8 +58,10 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
 
     private final String TAG = "BAOLAM";
 
-    private RecentlySongAdapter mRecentlySongAdapter;
+    private RecentlySongAdapter mThisDeviceSong;
     private MainActivity mainActivity;
+
+    private ThisDeviceViewModel mThisDeviceViewModel;
 
     public ThisDeviceFragment() {
         // Required empty public constructor
@@ -100,10 +109,21 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mThisDeviceSong = new RecentlySongAdapter();
 
-        mRecentlySongAdapter = new RecentlySongAdapter();
-        binding.rvSongs.setAdapter(mRecentlySongAdapter);
-        binding.rvSongs.setLayoutManager(new LinearLayoutManager(this.requireContext(),LinearLayoutManager.VERTICAL,false));
+        initview();
+
+        initViewModel();
+
+        mThisDeviceViewModel.liveDataListSong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
+            @Override
+            public void onChanged(List<Song> songs) {
+                mThisDeviceSong.updateData(songs);
+            }
+        });
+
+
+
 
         mainActivity = (MainActivity) getActivity();
         mainActivity.setCallback(this);
@@ -116,6 +136,7 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     @Override
     public void onStart() {
         super.onStart();
+//
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
                 onRequestSuccess();
@@ -131,44 +152,28 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
         }
     }
 
-    private List<Song> getAllSongs(ContentResolver contentResolver) {
-        List<Song> songs = new ArrayList<>();
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String[] projection = {MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA};
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
 
-        Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
-        cursor.moveToFirst();
+    private void initview() {
 
-        int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
-        int titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
-        int artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
-        int albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
-        int durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
-        int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+        int top = getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._10sdp);
+        int bottom = getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._80sdp);
+        CustomItemSongDecoration customItemDecoration = new CustomItemSongDecoration(top, bottom);
 
-
-        do {
-            String id = cursor.getString(idColumn);
-            String title = cursor.getString(titleColumn);
-            String artist = cursor.getString(artistColumn);
-            String album = cursor.getString(albumColumn);
-            String duration = cursor.getString(durationColumn);
-            String data = cursor.getString(dataColumn);
-            songs.add(new Song(id, title, artist, album, duration, data));
-
-        } while (cursor.moveToNext());
-        return songs;
+        binding.rvSongs.setAdapter(mThisDeviceSong);
+        binding.rvSongs.setLayoutManager(new LinearLayoutManager(this.requireContext(),LinearLayoutManager.VERTICAL,false));
+        binding.rvSongs.addItemDecoration(customItemDecoration);
     }
+
+    private void initViewModel() {
+        Application application  = getActivity().getApplication();
+        ThisDeviceViewModelFactory thisDeviceViewModelFactory = new ThisDeviceViewModelFactory(application);
+        mThisDeviceViewModel = new ViewModelProvider(this, thisDeviceViewModelFactory).get(ThisDeviceViewModel.class);
+    }
+
+
 
     @Override
     public void onRequestSuccess() {
-        List<Song> songs = getAllSongs(getContext().getContentResolver());
-        mRecentlySongAdapter.updateData(songs);
+        mThisDeviceViewModel.getAllSongs(getContext().getContentResolver());
     }
 }

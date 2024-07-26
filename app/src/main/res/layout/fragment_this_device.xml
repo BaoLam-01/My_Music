@@ -127,17 +127,13 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <ScrollView
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_songs"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/appbar">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_songs"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </ScrollView>
-
+            android:layout_height="wrap_content"
+            android:layout_below="@id/appbar"
+            android:layout_marginHorizontal="@dimen/_15sdp" />
 
     </RelativeLayout>
 </layout>

@@ -33,6 +33,7 @@ android {
         dataBinding = true
         viewBinding = true
     }
+
 }
 
 dependencies {
@@ -51,4 +52,9 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation ("jp.wasabeef:glide-transformations:4.3.0")
     implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
+
+//blur view
+    implementation ("com.github.Dimezis:BlurView:version-2.0.3")
 }
+
+
