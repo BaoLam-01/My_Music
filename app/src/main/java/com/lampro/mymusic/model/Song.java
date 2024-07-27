@@ -1,8 +1,12 @@
 package com.lampro.mymusic.model;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Song {
+import androidx.annotation.NonNull;
+
+public class Song implements Parcelable {
     private Uri img;
     private Long id;
     private String name, artist,album,duration,data;
@@ -45,6 +49,33 @@ public class Song {
         this.uriSong = uriSong;
     }
 
+
+    protected Song(Parcel in) {
+        img = in.readParcelable(Uri.class.getClassLoader());
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readLong();
+        }
+        name = in.readString();
+        artist = in.readString();
+        album = in.readString();
+        duration = in.readString();
+        data = in.readString();
+        uriSong = in.readParcelable(Uri.class.getClassLoader());
+    }
+
+    public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
 
     public Uri getImg() {
         return img;
@@ -108,5 +139,27 @@ public class Song {
 
     public void setUriSong(Uri uriSong) {
         this.uriSong = uriSong;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeParcelable(img, flags);
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        dest.writeString(name);
+        dest.writeString(artist);
+        dest.writeString(album);
+        dest.writeString(duration);
+        dest.writeString(data);
+        dest.writeParcelable(uriSong, flags);
     }
 }

@@ -4,7 +4,11 @@ import static com.lampro.mymusic.MyApplication.CHANNEL_ID;
 
 import android.Manifest;
 import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,9 +18,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Parcelable;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -42,6 +49,7 @@ import com.lampro.mymusic.base.BaseActivity;
 import com.lampro.mymusic.databinding.ActivityMainBinding;
 import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Song;
+import com.lampro.mymusic.services.MusicService;
 
 import java.util.List;
 
@@ -54,13 +62,55 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     private OnRequestPermission onRequestPermission;
     private ActivityResultLauncher<Intent> getResult;
-    private MediaPlayer mediaPlayer;
+//    private MediaPlayer mediaPlayer;
 
     private Handler handler = new Handler();
     private Runnable updateSeekBar;
 
     private boolean isMuted = false;
 
+
+    private MusicService musicService;
+    private boolean isBound = false;
+
+
+    @Override
+    public void sendOrderedBroadcast(Intent intent, @Nullable String receiverPermission) {
+        super.sendOrderedBroadcast(intent, receiverPermission);
+        if (intent.getAction() != null && intent.getAction().equals("NEXT_MUSIC")) {
+            Intent nextIntent = new Intent(this, MusicService.class);
+            nextIntent.setAction("NEXT");
+            this.startService(nextIntent);
+            Toast.makeText(this, "Playing next song", Toast.LENGTH_SHORT).show();
+        }
+
+        if (intent.getAction() != null && intent.getAction().equals("PAUSE_MUSIC")) {
+            Intent nextIntent = new Intent(this, MusicService.class);
+            Toast.makeText(this, "Pause", Toast.LENGTH_SHORT).show();
+            binding.ibtnPause.setImageResource(R.drawable.pause);
+        }
+
+        if (intent.getAction() != null && intent.getAction().equals("PLAY_MUSIC")) {
+            Intent nextIntent = new Intent(this, MusicService.class);
+            Toast.makeText(this, "Play", Toast.LENGTH_SHORT).show();
+            binding.ibtnPause.setImageResource(R.drawable.play);
+        }
+    }
+
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            musicService = binder.getService();
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+        }
+    };
     @Override
     protected ActivityMainBinding inflateBinding() {
         return ActivityMainBinding.inflate(getLayoutInflater());
@@ -112,11 +162,11 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         navigationView = binding.navBottom;
 
-        if (mediaPlayer == null) {
-            binding.llFramePlaying.setVisibility(View.GONE);
-        } else {
-            binding.llFramePlaying.setVisibility(View.VISIBLE);
-        }
+//        if (mediaPlayer == null) {
+//            binding.llFramePlaying.setVisibility(View.GONE);
+//        } else {
+//            binding.llFramePlaying.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void listener() {
@@ -144,9 +194,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         binding.seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && mediaPlayer != null) {
-                    mediaPlayer.seekTo(progress);
-                }
+//                if (fromUser && mediaPlayer != null) {
+//                    mediaPlayer.seekTo(progress);
+//                }
             }
 
             @Override
@@ -159,15 +209,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         });
 
 
-        updateSeekBar = new Runnable() {
-            @Override
-            public void run() {
-                if (mediaPlayer != null) {
-                    binding.seekbar.setProgress(mediaPlayer.getCurrentPosition());
-                }
-                handler.postDelayed(this, 1000);
-            }
-        };
+//        updateSeekBar = new Runnable() {
+//            @Override
+//            public void run() {
+//                if (mediaPlayer != null) {
+//                    binding.seekbar.setProgress(mediaPlayer.getCurrentPosition());
+//                }
+//                handler.postDelayed(this, 1000);
+//            }
+//        };
 
         binding.tvSongName.setSelected(true);
         binding.cvImgPlaying.setOnClickListener(this);
@@ -186,30 +236,30 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             startActivity(intent);
         }
 
-        if (v.getId() == R.id.ibtn_volume) {
-            if (mediaPlayer != null) {
-                if (!isMuted) {
-                    mediaPlayer.setVolume(0f, 0f);
-                    binding.ibtnVolume.setImageResource(R.drawable.mute);
-                } else {
-                    mediaPlayer.setVolume(1f, 1f);
-                    binding.ibtnVolume.setImageResource(R.drawable.volume_high);
-                }
-                isMuted = !isMuted;
-            }
-        }
-        if (v.getId() == R.id.ibtn_pause) {
-            if (mediaPlayer != null) {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                    binding.ibtnPause.setImageResource(R.drawable.play);
-                } else {
-                    mediaPlayer.start();
-                    binding.ibtnPause.setImageResource(R.drawable.pause);
-                }
-            }
-
-        }
+//        if (v.getId() == R.id.ibtn_volume) {
+//            if (mediaPlayer != null) {
+//                if (!isMuted) {
+//                    mediaPlayer.setVolume(0f, 0f);
+//                    binding.ibtnVolume.setImageResource(R.drawable.mute);
+//                } else {
+//                    mediaPlayer.setVolume(1f, 1f);
+//                    binding.ibtnVolume.setImageResource(R.drawable.volume_high);
+//                }
+//                isMuted = !isMuted;
+//            }
+//        }
+//        if (v.getId() == R.id.ibtn_pause) {
+//            if (mediaPlayer != null) {
+//                if (mediaPlayer.isPlaying()) {
+//                    mediaPlayer.pause();
+//                    binding.ibtnPause.setImageResource(R.drawable.play);
+//                } else {
+//                    mediaPlayer.start();
+//                    binding.ibtnPause.setImageResource(R.drawable.pause);
+//                }
+//            }
+//
+//        }
     }
 
 
@@ -275,31 +325,36 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     @Override
     public void playSong(List<Song> listSong, int position) {
 
+        Intent intent = new Intent(this, MusicService.class);
+        Song s = listSong.get(position);
+        intent.setAction(null);
+        intent.putExtra("song", s);
+        startService(intent);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
-
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-        }
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            Uri uriSong = listSong.get(position).getUriSong();
-
-            mediaPlayer = MediaPlayer.create(MainActivity.this, uriSong);
-            mediaPlayer.setVolume(1f, 1f);
-            mediaPlayer.setLooping(false);
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    int vt = (position + 1) % listSong.size();
-                    playSong(listSong, vt);
-                }
-            });
-            binding.seekbar.setMax(mediaPlayer.getDuration());
-            mediaPlayer.start();
-            handler.post(updateSeekBar);
-            binding.setSongPlaying(listSong.get(position));
-            binding.llFramePlaying.setVisibility(View.VISIBLE);
-        }
+//        if (mediaPlayer != null) {
+//            mediaPlayer.release();
+//        }
+//
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+//            Uri uriSong = listSong.get(position).getUriSong();
+//
+//            mediaPlayer = MediaPlayer.create(MainActivity.this, uriSong);
+//            mediaPlayer.setVolume(1f, 1f);
+//            mediaPlayer.setLooping(false);
+//            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                @Override
+//                public void onCompletion(MediaPlayer mp) {
+//                    int vt = (position + 1) % listSong.size();
+//                    playSong(listSong, vt);
+//                }
+//            });
+//            binding.seekbar.setMax(mediaPlayer.getDuration());
+//            mediaPlayer.start();
+//            handler.post(updateSeekBar);
+//            binding.setSongPlaying(listSong.get(position));
+//            binding.llFramePlaying.setVisibility(View.VISIBLE);
+//        }
     }
 
 
@@ -333,11 +388,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                 ).build();
 
         NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
 
-            return;
+            managerCompat.notify(1, notification);
         }
-        managerCompat.notify(1, notification);
 
     }
 
@@ -345,9 +399,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-        }
+//        if (mediaPlayer != null) {
+//            mediaPlayer.release();
+//        }
         handler.removeCallbacks(updateSeekBar);
+        if (isBound) {
+            unbindService(serviceConnection);
+            isBound = false;
+        }
     }
 }
