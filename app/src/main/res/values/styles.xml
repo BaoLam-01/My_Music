@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomBottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconSize" > @dimen/_18sdp</item>
+        <item name="itemTextAppearanceActive">@style/BottomNavigationView.Active</item>
+        <item name="itemTextAppearanceInactive">@style/BottomNavigationView.Inactive</item>
+    </style>
+
+    <style name="BottomNavigationView.Active" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">@dimen/_8ssp</item>
+        <item name="itemTextColor">@color/black</item>
+    </style>
+
+    <style name="BottomNavigationView.Inactive" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textSize">@dimen/_8ssp</item>
+    </style>
+
+</resources>

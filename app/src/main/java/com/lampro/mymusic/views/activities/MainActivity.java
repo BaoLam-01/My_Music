@@ -35,6 +35,7 @@ import androidx.media3.session.MediaStyleNotificationHelper;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.lampro.mymusic.DataRepository;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.adapters.ViewPagerAdapter;
 import com.lampro.mymusic.base.BaseActivity;
@@ -44,7 +45,7 @@ import com.lampro.mymusic.model.Song;
 
 import java.util.List;
 
-public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener, IOnClickItemSong{
+public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener, IOnClickItemSong {
 
     public static final int MY_REQUEST_CODE = 10;
 
@@ -74,13 +75,12 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         listener();
 
 
-
         getResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if ( result.getResultCode() == RESULT_CANCELED){
+                        if (result.getResultCode() == RESULT_CANCELED) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                 if (Environment.isExternalStorageManager()) {
                                     onRequestPermission.onRequestSuccess();
@@ -103,6 +103,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     }
 
     private void initView() {
+
+
         vpContent = binding.vpContent;
         vpContent.setAdapter(new ViewPagerAdapter(this));
         vpContent.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
@@ -112,10 +114,11 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         if (mediaPlayer == null) {
             binding.llFramePlaying.setVisibility(View.GONE);
-        }else {
+        } else {
             binding.llFramePlaying.setVisibility(View.VISIBLE);
         }
     }
+
     private void listener() {
         navigationView.setOnItemSelectedListener(v -> {
 
@@ -186,10 +189,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         if (v.getId() == R.id.ibtn_volume) {
             if (mediaPlayer != null) {
                 if (!isMuted) {
-                    mediaPlayer.setVolume(0f,0f);
+                    mediaPlayer.setVolume(0f, 0f);
                     binding.ibtnVolume.setImageResource(R.drawable.mute);
-                }else {
-                    mediaPlayer.setVolume(1f,1f);
+                } else {
+                    mediaPlayer.setVolume(1f, 1f);
                     binding.ibtnVolume.setImageResource(R.drawable.volume_high);
                 }
                 isMuted = !isMuted;
@@ -272,6 +275,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     @Override
     public void playSong(List<Song> listSong, int position) {
 
+
+
         if (mediaPlayer != null) {
             mediaPlayer.release();
         }
@@ -280,13 +285,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             Uri uriSong = listSong.get(position).getUriSong();
 
             mediaPlayer = MediaPlayer.create(MainActivity.this, uriSong);
-            mediaPlayer.setVolume(1f,1f);
+            mediaPlayer.setVolume(1f, 1f);
             mediaPlayer.setLooping(false);
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     int vt = (position + 1) % listSong.size();
-                    playSong(listSong,vt);
+                    playSong(listSong, vt);
                 }
             });
             binding.seekbar.setMax(mediaPlayer.getDuration());

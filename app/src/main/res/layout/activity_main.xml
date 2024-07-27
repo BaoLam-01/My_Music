@@ -23,7 +23,6 @@
             android:id="@+id/vp_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/nav_bottom"
             android:layout_alignParentTop="true" />
 
         <FrameLayout
@@ -163,6 +162,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:background="@drawable/bottom_nav_background"
+            style="@style/CustomBottomNavigationView"
+            app:itemIconTint="@color/bottom_nav_item_icon"
+            app:itemTextColor="@color/bottom_nav_item_color"
+            app:itemRippleColor="@color/transparent"
             app:menu="@menu/menu" />
 
 
