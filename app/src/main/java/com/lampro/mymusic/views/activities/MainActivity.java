@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.support.v4.app.INotificationSideChannel;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -56,6 +57,7 @@ import java.util.List;
 public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener, IOnClickItemSong {
 
     public static final int MY_REQUEST_CODE = 10;
+    public static final int REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK = 1;
 
     private BottomNavigationView navigationView;
     private ViewPager2 vpContent;
@@ -70,8 +72,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     private boolean isMuted = false;
 
 
-    private MusicService musicService;
-    private boolean isBound = false;
+    private List<Song> playlistPlaying;
+    private int positionPlaying;
 
 
     @Override
@@ -98,19 +100,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     }
 
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-            musicService = binder.getService();
-            isBound = true;
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
-        }
-    };
     @Override
     protected ActivityMainBinding inflateBinding() {
         return ActivityMainBinding.inflate(getLayoutInflater());
@@ -301,6 +291,23 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     }
 
+    private void checkPermissionPlayMusic() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK)
+                != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE)
+                        != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK,
+                            Manifest.permission.FOREGROUND_SERVICE,
+                            Manifest.permission.POST_NOTIFICATIONS},
+                    REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
+        } else {
+            play(playlistPlaying, positionPlaying);
+        }
+    }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -319,23 +326,30 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         }
 
+        if (requestCode == REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                play(playlistPlaying, positionPlaying);
+            }
+        }
+
 
     }
 
     @Override
     public void playSong(List<Song> listSong, int position) {
 
-        Intent intent = new Intent(this, MusicService.class);
-        Song s = listSong.get(position);
-        intent.setAction(null);
-        intent.putExtra("song", s);
-        startService(intent);
-        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+        playlistPlaying = listSong;
+        positionPlaying = position;
+        checkPermissionPlayMusic();
+
+
 
 //        if (mediaPlayer != null) {
 //            mediaPlayer.release();
 //        }
-//
+
 //        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
 //            Uri uriSong = listSong.get(position).getUriSong();
 //
@@ -355,6 +369,14 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 //            binding.setSongPlaying(listSong.get(position));
 //            binding.llFramePlaying.setVisibility(View.VISIBLE);
 //        }
+    }
+
+    private void play(List<Song> listSong, int position) {
+        Intent intent = new Intent(this, MusicService.class);
+        Song s = listSong.get(position);
+        intent.setAction(null);
+        intent.putExtra("song", s);
+        startService(intent);
     }
 
 
@@ -402,10 +424,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 //        if (mediaPlayer != null) {
 //            mediaPlayer.release();
 //        }
-        handler.removeCallbacks(updateSeekBar);
-        if (isBound) {
-            unbindService(serviceConnection);
-            isBound = false;
-        }
+//        handler.removeCallbacks(updateSeekBar);
     }
 }

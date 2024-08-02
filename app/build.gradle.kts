@@ -55,6 +55,7 @@ dependencies {
 
 //blur view
     implementation ("com.github.Dimezis:BlurView:version-2.0.3")
+    implementation("androidx.media:media:1.7.0")
 }
 
 

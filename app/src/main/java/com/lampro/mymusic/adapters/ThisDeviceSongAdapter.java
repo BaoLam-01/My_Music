@@ -1,9 +1,15 @@
 package com.lampro.mymusic.adapters;
 
+import static com.lampro.mymusic.views.activities.MainActivity.REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.base.BaseRecyclerViewAdapter;
@@ -30,6 +36,7 @@ public class ThisDeviceSongAdapter  extends BaseRecyclerViewAdapter<Song, ItemSo
         holder.binding.itemBody.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 iOnClickItemSong.playSong(mlistAdapter,holder.getAdapterPosition());
             }
         });
