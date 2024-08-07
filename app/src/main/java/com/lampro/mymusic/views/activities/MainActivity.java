@@ -1,19 +1,19 @@
 package com.lampro.mymusic.views.activities;
 
-import static com.lampro.mymusic.MyApplication.CHANNEL_ID;
+import static com.lampro.mymusic.utils.MusicService.CLEAR;
+import static com.lampro.mymusic.utils.MusicService.MUTED;
+import static com.lampro.mymusic.utils.MusicService.PAUSE;
+import static com.lampro.mymusic.utils.MusicService.PLAY;
 import static com.lampro.mymusic.utils.MusicService.SEND_ACTION_TO_ACTIVITY;
 import static com.lampro.mymusic.utils.MusicService.START;
+import static com.lampro.mymusic.utils.MusicService.UNMUTED;
 
 import android.Manifest;
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -30,15 +29,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.media3.common.util.UnstableApi;
-import androidx.media3.session.MediaSession;
-import androidx.media3.session.MediaStyleNotificationHelper;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -63,7 +56,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     private OnRequestPermission onRequestPermission;
     private ActivityResultLauncher<Intent> getResult;
-    private boolean permissionPlayMusic;
 
     private Handler handler = new Handler();
     private Runnable updateSeekBar;
@@ -73,12 +65,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     private List<Song> playlistPlaying;
     private int positionPlaying;
+    private Song songPlaying;
+    private boolean isPlaying;
 
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            assert bundle != null;
+            songPlaying = bundle.getParcelable("songPlaying");
+            isPlaying = bundle.getBoolean("isPlaying");
+            isMuted = bundle.getBoolean("isMuted");
 
+            String actionMusic = intent.getAction();
+            assert actionMusic != null;
+            handlerActionMusic(actionMusic);
 
         }
     };
@@ -101,26 +103,23 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         getResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
-                        if (result.getResultCode() == RESULT_CANCELED) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                if (Environment.isExternalStorageManager()) {
-                                    onRequestPermission.onRequestSuccess();
+                result -> {
+                    if (result.getResultCode() == RESULT_CANCELED) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            if (Environment.isExternalStorageManager()) {
+                                onRequestPermission.onRequestSuccess();
 
-                                }
-                            } else {
-                                // Các quyền khác cho Android dưới 11
-                                if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-                                        == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_AUDIO)
-                                        == PackageManager.PERMISSION_GRANTED) {
-                                    onRequestPermission.onRequestSuccess();
-                                }
+                            }
+                        } else {
+                            // Các quyền khác cho Android dưới 11
+                            if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                                    == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_AUDIO)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                                onRequestPermission.onRequestSuccess();
                             }
                         }
-//
                     }
+//
                 }
         );
 
@@ -136,11 +135,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         navigationView = binding.navBottom;
 
-//        if (mediaPlayer == null) {
-//            binding.llFramePlaying.setVisibility(View.GONE);
-//        } else {
-//            binding.llFramePlaying.setVisibility(View.VISIBLE);
-//        }
     }
 
     private void listener() {
@@ -182,7 +176,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             }
         });
 
-
+//      Cap nhat seekbar theo tien trinh bai nhac
 //        updateSeekBar = new Runnable() {
 //            @Override
 //            public void run() {
@@ -196,7 +190,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         binding.tvSongName.setSelected(true);
         binding.cvImgPlaying.setOnClickListener(this);
         binding.llTitlePlaying.setOnClickListener(this);
-        binding.ibtnPause.setOnClickListener(this);
+        binding.ibtnPlayOrPause.setOnClickListener(this);
         binding.ibtnVolume.setOnClickListener(this);
 
     }
@@ -210,30 +204,21 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             startActivity(intent);
         }
 
-//        if (v.getId() == R.id.ibtn_volume) {
-//            if (mediaPlayer != null) {
-//                if (!isMuted) {
-//                    mediaPlayer.setVolume(0f, 0f);
-//                    binding.ibtnVolume.setImageResource(R.drawable.mute);
-//                } else {
-//                    mediaPlayer.setVolume(1f, 1f);
-//                    binding.ibtnVolume.setImageResource(R.drawable.volume_high);
-//                }
-//                isMuted = !isMuted;
-//            }
-//        }
-//        if (v.getId() == R.id.ibtn_pause) {
-//            if (mediaPlayer != null) {
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.pause();
-//                    binding.ibtnPause.setImageResource(R.drawable.play);
-//                } else {
-//                    mediaPlayer.start();
-//                    binding.ibtnPause.setImageResource(R.drawable.pause);
-//                }
-//            }
-//
-//        }
+        if (v.getId() == R.id.ibtn_volume) {
+            if (isMuted) {
+                sendActionToService(UNMUTED);
+            } else {
+                sendActionToService(MUTED);
+            }
+        }
+        if (v.getId() == R.id.ibtn_play_or_pause) {
+            if (isPlaying) {
+                sendActionToService(PAUSE);
+            } else {
+                sendActionToService(PLAY);
+            }
+
+        }
     }
 
 
@@ -266,9 +251,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
             } else {
                 String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_MEDIA_AUDIO};
-                }
                 ActivityCompat.requestPermissions(this, permissions, MY_REQUEST_CODE);
             }
         }
@@ -296,7 +278,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         if (requestCode == REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startSong(playlistPlaying,positionPlaying);
+                startSong(playlistPlaying, positionPlaying);
             }
         }
 
@@ -317,17 +299,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             } else {
                 startSong(playlistPlaying, positionPlaying);
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Đối với Android 10 đến 12
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
-            } else {
-                startSong(playlistPlaying, positionPlaying);
-            }
         } else {
-            // Đối với các phiên bản Android thấp hơn
+            // Đối với Android 10 đến 12
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -367,41 +340,58 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     }
 
 
-    @OptIn(markerClass = UnstableApi.class)
-    private void sendNotificationMedia() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.son_tung);
-
-
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_small_music)
-                .setSubText("LamPro")
-                .setContentTitle("Title of song")
-                .setContentText("Singe of song")
-                .setLargeIcon(bitmap)
-                .addAction(R.drawable.ic_previous, "Previous", null)
-                .addAction(R.drawable.ic_pause, "Play,Pause", null)
-                .addAction(R.drawable.ic_next, "Next", null)
-                .setStyle(new MediaStyleNotificationHelper.MediaStyle(getSystemService(MediaSession.class))
-                        .setShowActionsInCompactView(0 /* #1: pause button */)
-                        .setShowActionsInCompactView(1 /* #1: pause button */)
-                        .setShowActionsInCompactView(2 /* #1: pause button */)
-                ).build();
-
-        NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-
-            managerCompat.notify(1, notification);
+    public void handlerActionMusic(String action) {
+        switch (action) {
+            case START:
+                binding.setSongPlaying(songPlaying);
+                binding.llFramePlaying.setVisibility(View.VISIBLE);
+                binding.llFramePlaying.setVisibility(View.GONE);
+                setStatustButtonPlayOrPause();
+                break;
+            case PLAY:
+                setStatustButtonPlayOrPause();
+                break;
+            case PAUSE:
+                setStatustButtonPlayOrPause();
+                break;
+            case MUTED:
+                setStatustButtonMute();
+                break;
+            case UNMUTED:
+                setStatustButtonMute();
+                break;
+            case CLEAR:
+                binding.llFramePlaying.setVisibility(View.GONE);
+                break;
         }
+    }
 
+    private void setStatustButtonPlayOrPause() {
+        if (isPlaying) {
+            binding.ibtnPlayOrPause.setImageResource(R.drawable.pause);
+        } else {
+            binding.ibtnPlayOrPause.setImageResource(R.drawable.play);
+        }
+    }
+
+    private void setStatustButtonMute() {
+        if (isMuted) {
+            binding.ibtnPlayOrPause.setImageResource(R.drawable.mute);
+        } else {
+            binding.ibtnPlayOrPause.setImageResource(R.drawable.volume_high);
+        }
+    }
+
+    private void sendActionToService(String action) {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.setAction(action);
+        startForegroundService(intent);
     }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if (mediaPlayer != null) {
-//            mediaPlayer.release();
-//        }
 //        handler.removeCallbacks(updateSeekBar);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

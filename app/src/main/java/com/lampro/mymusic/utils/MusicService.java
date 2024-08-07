@@ -26,6 +26,7 @@ import androidx.media3.common.util.UnstableApi;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.model.Song;
 
+import java.io.IOException;
 import java.util.List;
 
 public class MusicService extends Service {
@@ -36,12 +37,15 @@ public class MusicService extends Service {
     public static final String CLEAR = "CLEAR";
     public static final String NEXT = "NEXT";
     public static final String PREVIOUS = "PREVIOUS";
+    public static final String MUTED = "MUTED";
+    public static final String UNMUTED = "UNMUTED";
     public static final String SEND_ACTION_TO_ACTIVITY = "SEND_ACTION_TO_ACTIVITY";
 
     private MediaPlayer mediaPlayer;
     private List<Song> listSong;
     private int position;
     private Song song;
+    private boolean isMuted = false;
 
 
     private MediaSessionCompat mediaSession;
@@ -105,9 +109,14 @@ public class MusicService extends Service {
             case NEXT:
                 nextMusic();
                 break;
+            case MUTED:
+                mutedMusic();
+                break;
+            case UNMUTED:
+                unMutedMusic();
+                break;
             case CLEAR:
                 stopSelf();
-                sendActionToActivity(CLEAR);
                 break;
         }
     }
@@ -122,9 +131,16 @@ public class MusicService extends Service {
         mediaPlayer = MediaPlayer.create(this, uri);
         mediaPlayer.setLooping(false);
         mediaPlayer.setVolume(1f, 1f);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                nextMusic();
+            }
+        });
+        isMuted = false;
         mediaPlayer.start();
-        mediaPlayer.isPlaying();
         sendActionToActivity(START);
+
     }
 
     private void playMusic() {
@@ -132,6 +148,7 @@ public class MusicService extends Service {
             mediaPlayer.start();
             sendActionToActivity(PLAY);
         }
+
     }
 
     private void pauseMusic() {
@@ -148,7 +165,6 @@ public class MusicService extends Service {
         position -= 1;
         song = listSong.get(position);
         startMusic(song.getUriSong());
-        sendActionToActivity(PREVIOUS);
     }
 
     private void nextMusic() {
@@ -158,7 +174,18 @@ public class MusicService extends Service {
         position += 1;
         song = listSong.get(position);
         startMusic(song.getUriSong());
-        sendActionToActivity(NEXT);
+    }
+
+    private void mutedMusic() {
+        mediaPlayer.setVolume(0f, 0f);
+        isMuted = true;
+        sendActionToActivity(MUTED);
+    }
+
+    private void unMutedMusic() {
+        mediaPlayer.setVolume(1f, 1f);
+        isMuted = false;
+        sendActionToActivity(UNMUTED);
     }
 
     @SuppressLint("ForegroundServiceType")
@@ -246,12 +273,13 @@ public class MusicService extends Service {
     }
 
     private void sendActionToActivity(String action) {
-        Intent intent = new Intent("SEND_ACTION_TO_ACTIVITY");
+        Intent intent = new Intent(SEND_ACTION_TO_ACTIVITY);
         intent.setAction(action);
 
         Bundle bundle = new Bundle();
-//        bundle.putParcelable("mediaPlayer", (Parcelable) mediaPlayer);
-        bundle.putParcelable("song", song);
+        bundle.putBoolean("isMuted", isMuted);
+        bundle.putBoolean("isPlaying", mediaPlayer.isPlaying());
+        bundle.putParcelable("songPlaying", song);
 
         intent.putExtras(bundle);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
