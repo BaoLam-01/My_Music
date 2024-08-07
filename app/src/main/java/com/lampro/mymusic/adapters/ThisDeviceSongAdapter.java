@@ -1,14 +1,15 @@
 package com.lampro.mymusic.adapters;
 
-import static com.lampro.mymusic.views.activities.MainActivity.REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK;
+import static com.lampro.mymusic.utils.MusicService.START;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.lampro.mymusic.R;
@@ -16,10 +17,15 @@ import com.lampro.mymusic.base.BaseRecyclerViewAdapter;
 import com.lampro.mymusic.databinding.ItemSongBinding;
 import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Song;
+import com.lampro.mymusic.utils.MusicService;
+import com.lampro.mymusic.views.activities.MainActivity;
 
-public class ThisDeviceSongAdapter  extends BaseRecyclerViewAdapter<Song, ItemSongBinding> {
+import java.util.ArrayList;
+
+public class ThisDeviceSongAdapter extends BaseRecyclerViewAdapter<Song, ItemSongBinding> {
 
     private IOnClickItemSong iOnClickItemSong;
+    private MainActivity mainActivity;
 
     public ThisDeviceSongAdapter(IOnClickItemSong iOnClickItemSong) {
         this.iOnClickItemSong = iOnClickItemSong;
@@ -36,10 +42,10 @@ public class ThisDeviceSongAdapter  extends BaseRecyclerViewAdapter<Song, ItemSo
         holder.binding.itemBody.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                iOnClickItemSong.playSong(mlistAdapter,holder.getAdapterPosition());
+                iOnClickItemSong.playSong(mlistAdapter, holder.getAdapterPosition());
             }
         });
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.lampro.mymusic.model;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,12 +8,12 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 public class Song implements Parcelable {
-    private Uri img;
+    private Bitmap img;
     private Long id;
     private String name, artist,album,duration,data;
     private Uri uriSong;
 
-    public Song(Uri img, String name, String artist) {
+    public Song(Bitmap img, String name, String artist) {
         this.img = img;
         this.name = name;
         this.artist = artist;
@@ -28,7 +29,7 @@ public class Song implements Parcelable {
         this.data = data;
     }
 
-    public Song(Uri img, Long id, String name, String artist, String album, String duration, String data) {
+    public Song(Bitmap img, Long id, String name, String artist, String album, String duration, String data) {
         this.img = img;
         this.id = id;
         this.name = name;
@@ -38,7 +39,7 @@ public class Song implements Parcelable {
         this.data = data;
     }
 
-    public Song(Uri img, Long id, String name, String artist, String album, String duration, String data, Uri uriSong) {
+    public Song(Bitmap img, Long id, String name, String artist, String album, String duration, String data, Uri uriSong) {
         this.img = img;
         this.id = id;
         this.name = name;
@@ -77,11 +78,11 @@ public class Song implements Parcelable {
         }
     };
 
-    public Uri getImg() {
+    public Bitmap getImg() {
         return img;
     }
 
-    public void setImg(Uri img) {
+    public void setImg(Bitmap img) {
         this.img = img;
     }
 

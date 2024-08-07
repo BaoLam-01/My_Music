@@ -1,27 +1,25 @@
 package com.lampro.mymusic.views.activities;
 
 import static com.lampro.mymusic.MyApplication.CHANNEL_ID;
+import static com.lampro.mymusic.utils.MusicService.SEND_ACTION_TO_ACTIVITY;
+import static com.lampro.mymusic.utils.MusicService.START;
 
 import android.Manifest;
 import android.app.Notification;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Parcelable;
 import android.provider.Settings;
-import android.support.v4.app.INotificationSideChannel;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -37,21 +35,22 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaStyleNotificationHelper;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.lampro.mymusic.DataRepository;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.adapters.ViewPagerAdapter;
 import com.lampro.mymusic.base.BaseActivity;
 import com.lampro.mymusic.databinding.ActivityMainBinding;
 import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Song;
-import com.lampro.mymusic.services.MusicService;
+import com.lampro.mymusic.utils.MusicService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener, IOnClickItemSong {
@@ -64,7 +63,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     private OnRequestPermission onRequestPermission;
     private ActivityResultLauncher<Intent> getResult;
-//    private MediaPlayer mediaPlayer;
+    private boolean permissionPlayMusic;
 
     private Handler handler = new Handler();
     private Runnable updateSeekBar;
@@ -76,29 +75,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     private int positionPlaying;
 
 
-    @Override
-    public void sendOrderedBroadcast(Intent intent, @Nullable String receiverPermission) {
-        super.sendOrderedBroadcast(intent, receiverPermission);
-        if (intent.getAction() != null && intent.getAction().equals("NEXT_MUSIC")) {
-            Intent nextIntent = new Intent(this, MusicService.class);
-            nextIntent.setAction("NEXT");
-            this.startService(nextIntent);
-            Toast.makeText(this, "Playing next song", Toast.LENGTH_SHORT).show();
-        }
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
 
-        if (intent.getAction() != null && intent.getAction().equals("PAUSE_MUSIC")) {
-            Intent nextIntent = new Intent(this, MusicService.class);
-            Toast.makeText(this, "Pause", Toast.LENGTH_SHORT).show();
-            binding.ibtnPause.setImageResource(R.drawable.pause);
-        }
 
-        if (intent.getAction() != null && intent.getAction().equals("PLAY_MUSIC")) {
-            Intent nextIntent = new Intent(this, MusicService.class);
-            Toast.makeText(this, "Play", Toast.LENGTH_SHORT).show();
-            binding.ibtnPause.setImageResource(R.drawable.play);
         }
-    }
-
+    };
 
 
     @Override
@@ -110,6 +93,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(SEND_ACTION_TO_ACTIVITY));
 
         initView();
         listener();
@@ -291,22 +275,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     }
 
-    private void checkPermissionPlayMusic() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK)
-                != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE)
-                        != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                        != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK,
-                            Manifest.permission.FOREGROUND_SERVICE,
-                            Manifest.permission.POST_NOTIFICATIONS},
-                    REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
-        } else {
-            play(playlistPlaying, positionPlaying);
-        }
-    }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -327,14 +295,47 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         }
 
         if (requestCode == REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                    grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                    grantResults[2] == PackageManager.PERMISSION_GRANTED) {
-                play(playlistPlaying, positionPlaying);
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startSong(playlistPlaying,positionPlaying);
             }
         }
 
 
+    }
+
+
+    private void checkSelfPermissionPlayMusic() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Đối với Android 13 trở lên
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.READ_MEDIA_AUDIO,
+                                Manifest.permission.POST_NOTIFICATIONS},
+                        REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
+            } else {
+                startSong(playlistPlaying, positionPlaying);
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Đối với Android 10 đến 12
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
+            } else {
+                startSong(playlistPlaying, positionPlaying);
+            }
+        } else {
+            // Đối với các phiên bản Android thấp hơn
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
+            } else {
+                startSong(playlistPlaying, positionPlaying);
+            }
+        }
     }
 
     @Override
@@ -342,41 +343,18 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         playlistPlaying = listSong;
         positionPlaying = position;
-        checkPermissionPlayMusic();
-
-
-
-//        if (mediaPlayer != null) {
-//            mediaPlayer.release();
-//        }
-
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//            Uri uriSong = listSong.get(position).getUriSong();
-//
-//            mediaPlayer = MediaPlayer.create(MainActivity.this, uriSong);
-//            mediaPlayer.setVolume(1f, 1f);
-//            mediaPlayer.setLooping(false);
-//            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//                @Override
-//                public void onCompletion(MediaPlayer mp) {
-//                    int vt = (position + 1) % listSong.size();
-//                    playSong(listSong, vt);
-//                }
-//            });
-//            binding.seekbar.setMax(mediaPlayer.getDuration());
-//            mediaPlayer.start();
-//            handler.post(updateSeekBar);
-//            binding.setSongPlaying(listSong.get(position));
-//            binding.llFramePlaying.setVisibility(View.VISIBLE);
-//        }
+        checkSelfPermissionPlayMusic();
     }
 
-    private void play(List<Song> listSong, int position) {
+    private void startSong(List<Song> listSong, int position) {
         Intent intent = new Intent(this, MusicService.class);
-        Song s = listSong.get(position);
-        intent.setAction(null);
-        intent.putExtra("song", s);
-        startService(intent);
+        intent.setAction(START);
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("listSong", (ArrayList<? extends Parcelable>) listSong);
+        bundle.putInt("position", position);
+        intent.putExtras(bundle);
+        startForegroundService(intent);
+
     }
 
 
@@ -425,5 +403,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 //            mediaPlayer.release();
 //        }
 //        handler.removeCallbacks(updateSeekBar);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 }

@@ -5,6 +5,9 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -15,6 +18,9 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.lampro.mymusic.model.Song;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +62,6 @@ public class ThisDeviceViewModel extends AndroidViewModel {
             Long id = cursor.getLong(idColumn);
 
             Long albumId = cursor.getLong(idAlbumColumn);
-            Uri img = getAlbumArtUri(albumId);
 
 
             String title = cursor.getString(titleColumn);
@@ -66,6 +71,7 @@ public class ThisDeviceViewModel extends AndroidViewModel {
             String data = cursor.getString(dataColumn);
 
             Uri getUri = getSongUri(getApplication(), id);
+            Bitmap img = getAlbumArt(String.valueOf(getUri));
 
             songs.add(new Song(img, id, title, artist, album, duration, data, getUri));
 
@@ -82,5 +88,27 @@ public class ThisDeviceViewModel extends AndroidViewModel {
         Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
         return ContentUris.withAppendedId(albumArtUri, albumId);
     }
-
+    private Bitmap getAlbumArt(String filePath)  {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(filePath);
+            byte[] art = retriever.getEmbeddedPicture();
+            if (art != null) {
+                InputStream is = new ByteArrayInputStream(art);
+                return BitmapFactory.decodeStream(is);
+            } else {
+                // Trường hợp không có ảnh bìa
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                retriever.release();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

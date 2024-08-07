@@ -31,7 +31,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                imageUri="@{itemRecentlySong.img}"
+                imageBitmap="@{itemRecentlySong.img}"
                 tools:src="@drawable/em_cua_ngay_hom_qua" />
         </androidx.cardview.widget.CardView>
 

@@ -61,7 +61,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:scaleType="fitStart"
-                        imageUri="@{songPlaying.img}"/>
+                        imageBitmap="@{songPlaying.img}"/>
                 </androidx.cardview.widget.CardView>
 
 

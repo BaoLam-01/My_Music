@@ -1,5 +1,6 @@
 package com.lampro.mymusic.utils;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.widget.ImageView;
 
@@ -31,6 +32,11 @@ public class BindingUtils {
     @BindingAdapter("imageUri")
     public static void loadUriImg(@NonNull ImageView imageView, Uri uri) {
         Glide.with(imageView.getContext()).load(uri).centerCrop().placeholder(R.drawable.ic_small_music).into(imageView);
+
+    }
+    @BindingAdapter("imageBitmap")
+    public static void loadBitmapImg(@NonNull ImageView imageView, Bitmap bitmap) {
+        Glide.with(imageView.getContext()).load(bitmap).centerCrop().placeholder(R.drawable.ic_small_music).into(imageView);
 
     }
 }

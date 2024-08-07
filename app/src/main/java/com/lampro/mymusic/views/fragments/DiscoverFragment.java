@@ -154,8 +154,10 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> impl
         binding.rvRecently.setAdapter(recentlySongAdapter);
     }
 
+
+
     @Override
-    public void playSong(List<Song> listSong,int position) {
+    public void playSong(List<Song> listSong, int position) {
 
     }
 }
