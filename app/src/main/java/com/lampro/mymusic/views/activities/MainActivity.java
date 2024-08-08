@@ -73,14 +73,16 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
-            assert bundle != null;
-            songPlaying = bundle.getParcelable("songPlaying");
-            isPlaying = bundle.getBoolean("isPlaying");
-            isMuted = bundle.getBoolean("isMuted");
+            if (bundle != null) {
+                isMuted = bundle.getBoolean("isMuted");
+                isPlaying = bundle.getBoolean("isPlaying");
+                songPlaying = bundle.getParcelable("songPlaying");
+            }
 
             String actionMusic = intent.getAction();
-            assert actionMusic != null;
-            handlerActionMusic(actionMusic);
+            if (actionMusic != null) {
+                handlerActionMusic(actionMusic);
+            }
 
         }
     };
@@ -110,14 +112,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                                 onRequestPermission.onRequestSuccess();
 
                             }
-                        } else {
-                            // Các quyền khác cho Android dưới 11
-                            if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-                                    == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_AUDIO)
-                                    == PackageManager.PERMISSION_GRANTED) {
-                                onRequestPermission.onRequestSuccess();
-                            }
                         }
+//                        } else {
+//                            // Các quyền khác cho Android dưới 11
+//                            if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+//                                    == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_AUDIO)
+//                                    == PackageManager.PERMISSION_GRANTED) {
+//                                onRequestPermission.onRequestSuccess();
+//                            }
+//                        }
                     }
 //
                 }
@@ -262,18 +265,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == MY_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    onRequestPermission.onRequestSuccess();
-                }
 
-            } else {
-
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onRequestPermission.onRequestSuccess();
-                }
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onRequestPermission.onRequestSuccess();
             }
-
         }
 
         if (requestCode == REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK) {
@@ -345,7 +340,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             case START:
                 binding.setSongPlaying(songPlaying);
                 binding.llFramePlaying.setVisibility(View.VISIBLE);
-                binding.llFramePlaying.setVisibility(View.GONE);
                 setStatustButtonPlayOrPause();
                 break;
             case PLAY:
