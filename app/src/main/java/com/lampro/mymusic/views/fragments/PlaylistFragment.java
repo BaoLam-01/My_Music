@@ -28,7 +28,7 @@ import com.lampro.mymusic.views.activities.MainActivity;
 import java.util.List;
 
 
-public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> implements PlaylistAdapter.IOnPlaylistItemClickListener {
+public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> implements PlaylistAdapter.IOnPlaylistItemClickListener, MainActivity.OnRequestPermission {
 
 
     private static final String ARG_PARAM1 = "param1";
@@ -91,6 +91,8 @@ public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> impl
                 mPlaylistAdapter.updateData(playlists);
             }
         });
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.setCallback(this);
 
     }
 
@@ -136,5 +138,10 @@ public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> impl
         }
 
 
+    }
+
+    @Override
+    public void onRequestSuccess() {
+        mPlaylistViewModel.setDataListPlaylist();
     }
 }
