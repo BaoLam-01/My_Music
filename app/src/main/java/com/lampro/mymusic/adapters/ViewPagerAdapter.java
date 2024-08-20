@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.lampro.mymusic.views.fragments.DiscoverFragment;
-import com.lampro.mymusic.views.fragments.LikedFragment;
+import com.lampro.mymusic.views.fragments.SearchFragment;
 import com.lampro.mymusic.views.fragments.PlaylistFragment;
 import com.lampro.mymusic.views.fragments.SettingFragment;
 
@@ -22,7 +22,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         switch (position) {
             case 0: fragment = new DiscoverFragment();
             break;
-            case 1: fragment = new LikedFragment();
+            case 1: fragment = new SearchFragment();
             break;
             case 2: fragment = new PlaylistFragment();
             break;

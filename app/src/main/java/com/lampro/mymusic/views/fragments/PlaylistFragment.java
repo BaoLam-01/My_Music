@@ -1,6 +1,18 @@
 package com.lampro.mymusic.views.fragments;
 
+import static com.lampro.mymusic.utils.MusicService.CLEAR;
+import static com.lampro.mymusic.utils.MusicService.MUTED;
+import static com.lampro.mymusic.utils.MusicService.PAUSE;
+import static com.lampro.mymusic.utils.MusicService.PLAY;
+import static com.lampro.mymusic.utils.MusicService.SEND_ACTION_TO_ACTIVITY;
+import static com.lampro.mymusic.utils.MusicService.START;
+import static com.lampro.mymusic.utils.MusicService.UNMUTED;
+
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,6 +21,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.View;
@@ -20,6 +33,7 @@ import com.lampro.mymusic.adapters.PlaylistAdapter;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentPlaylistBinding;
 import com.lampro.mymusic.model.Playlist;
+import com.lampro.mymusic.model.Song;
 import com.lampro.mymusic.utils.CustomItemDecoration;
 import com.lampro.mymusic.viewmodels.playlistviewmodel.PlaylistViewModel;
 import com.lampro.mymusic.viewmodels.playlistviewmodel.PlaylistViewModelFactory;
@@ -41,6 +55,7 @@ public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> impl
     private PlaylistViewModel mPlaylistViewModel;
     private FilterAdapter mFilterAdapter;
     private PlaylistAdapter mPlaylistAdapter;
+
 
 
     public PlaylistFragment() {
@@ -94,6 +109,11 @@ public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> impl
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setCallback(this);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     private void initViewHolder() {

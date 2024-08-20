@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.lampro.mymusic" />
+                  <option name="mobileSdkAppId" value="1:414139655666:android:52265f9d569f7132d4b76b" />
+                  <option name="projectId" value="retromusic-5ed23" />
+                  <option name="projectNumber" value="414139655666" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

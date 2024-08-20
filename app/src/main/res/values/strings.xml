@@ -24,6 +24,7 @@
     <string name="open_lirics">Open lirics</string>
     <string name="xuan_thi">Xuan thi</string>
     <string name="bui_anh_tuan">Bui Anh Tuan</string>
+    <string name="play">Play/Pause</string>
     <array name="filter_playlist">
         <item name="podcast">Podcast</item>
         <item name="playlist">Playlist</item>

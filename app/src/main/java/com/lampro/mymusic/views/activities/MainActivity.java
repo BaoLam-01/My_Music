@@ -10,14 +10,17 @@ import static com.lampro.mymusic.utils.MusicService.UNMUTED;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.view.View;
@@ -68,25 +71,46 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     private Song songPlaying;
     private boolean isPlaying;
 
+    private MusicService musicService;
+    private Boolean isServiceConnected ;
+
+
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            binding.llFramePlaying.setVisibility(View.VISIBLE);
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 isMuted = bundle.getBoolean("isMuted");
                 isPlaying = bundle.getBoolean("isPlaying");
                 songPlaying = bundle.getParcelable("songPlaying");
-            }
-
-            String actionMusic = intent.getAction();
-            if (actionMusic != null) {
+                String actionMusic = bundle.getString("action");
+                assert actionMusic != null;
                 handlerActionMusic(actionMusic);
+
             }
 
         }
     };
 
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            isServiceConnected = true;
+            MusicService.MusicBinder musicBinder = (MusicService.MusicBinder) service;
+            musicService = musicBinder.getMusicService();
+            if (musicService.getMediaPlayer() != null) {
+                musicService.sendActionToActivity(START);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isServiceConnected = false;
+            musicService = null;
+        }
+    };
 
     @Override
     protected ActivityMainBinding inflateBinding() {
@@ -97,7 +121,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(SEND_ACTION_TO_ACTIVITY));
+        bindMusicService();
 
         initView();
         listener();
@@ -126,6 +150,17 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                 }
         );
 
+    }
+
+    private void bindMusicService() {
+        Intent intent = new Intent(this, MusicService.class);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(SEND_ACTION_TO_ACTIVITY));
     }
 
     private void initView() {
@@ -204,21 +239,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         if (v.getId() == R.id.cv_img_playing || v.getId() == R.id.ll_title_playing) {
             Intent intent = new Intent(MainActivity.this, MusicPlayerActivity.class);
+            intent.putExtra("songPlaying", songPlaying);
             startActivity(intent);
         }
 
         if (v.getId() == R.id.ibtn_volume) {
             if (isMuted) {
-                sendActionToService(UNMUTED);
+                musicService.unMutedMusic();
             } else {
-                sendActionToService(MUTED);
+                musicService.mutedMusic();
             }
         }
         if (v.getId() == R.id.ibtn_play_or_pause) {
             if (isPlaying) {
-                sendActionToService(PAUSE);
+                musicService.pauseMusic();
             } else {
-                sendActionToService(PLAY);
+                musicService.playMusic();
             }
 
         }
@@ -312,7 +348,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         playlistPlaying = listSong;
         positionPlaying = position;
         checkSelfPermissionPlayMusic();
+
     }
+
 
     private void startSong(List<Song> listSong, int position) {
         Intent intent = new Intent(this, MusicService.class);
@@ -321,7 +359,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         bundle.putParcelableArrayList("listSong", (ArrayList<? extends Parcelable>) listSong);
         bundle.putInt("position", position);
         intent.putExtras(bundle);
-        startForegroundService(intent);
+        startService(intent);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
     }
 
@@ -340,27 +379,31 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             case START:
                 binding.setSongPlaying(songPlaying);
                 binding.llFramePlaying.setVisibility(View.VISIBLE);
-                setStatustButtonPlayOrPause();
+                setStatusButtonPlayOrPause();
                 break;
             case PLAY:
-                setStatustButtonPlayOrPause();
+                setStatusButtonPlayOrPause();
                 break;
             case PAUSE:
-                setStatustButtonPlayOrPause();
+                setStatusButtonPlayOrPause();
                 break;
             case MUTED:
-                setStatustButtonMute();
+                setStatusButtonMute();
                 break;
             case UNMUTED:
-                setStatustButtonMute();
+                setStatusButtonMute();
                 break;
             case CLEAR:
                 binding.llFramePlaying.setVisibility(View.GONE);
+                if (isServiceConnected) {
+                    unbindService(serviceConnection);
+                    isServiceConnected = false;
+                }
                 break;
         }
     }
 
-    private void setStatustButtonPlayOrPause() {
+    private void setStatusButtonPlayOrPause() {
         if (isPlaying) {
             binding.ibtnPlayOrPause.setImageResource(R.drawable.pause);
         } else {
@@ -368,19 +411,14 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         }
     }
 
-    private void setStatustButtonMute() {
+    private void setStatusButtonMute() {
         if (isMuted) {
-            binding.ibtnPlayOrPause.setImageResource(R.drawable.mute);
+            binding.ibtnVolume.setImageResource(R.drawable.mute);
         } else {
-            binding.ibtnPlayOrPause.setImageResource(R.drawable.volume_high);
+            binding.ibtnVolume.setImageResource(R.drawable.volume_high);
         }
     }
 
-    private void sendActionToService(String action) {
-        Intent intent = new Intent(this, MusicService.class);
-        intent.setAction(action);
-        startForegroundService(intent);
-    }
 
 
     @Override
@@ -388,5 +426,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         super.onDestroy();
 //        handler.removeCallbacks(updateSeekBar);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        if (isServiceConnected) {
+            unbindService(serviceConnection);
+            isServiceConnected = false;
+        }
     }
 }

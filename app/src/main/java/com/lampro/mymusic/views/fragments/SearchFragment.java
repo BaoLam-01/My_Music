@@ -4,17 +4,13 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
-import com.lampro.mymusic.R;
 import com.lampro.mymusic.base.BaseFragment;
-import com.lampro.mymusic.databinding.FragmentLikedBinding;
+import com.lampro.mymusic.databinding.FragmentSearchBinding;
 
-public class LikedFragment extends BaseFragment<FragmentLikedBinding> {
+public class SearchFragment extends BaseFragment<FragmentSearchBinding> {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -22,11 +18,11 @@ public class LikedFragment extends BaseFragment<FragmentLikedBinding> {
     private String mParam1;
     private String mParam2;
 
-    public LikedFragment() {
+    public SearchFragment() {
     }
     @NonNull
-    public static LikedFragment newInstance(String param1, String param2) {
-        LikedFragment fragment = new LikedFragment();
+    public static SearchFragment newInstance(String param1, String param2) {
+        SearchFragment fragment = new SearchFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -44,8 +40,8 @@ public class LikedFragment extends BaseFragment<FragmentLikedBinding> {
     }
 
     @Override
-    protected FragmentLikedBinding inflateBinding() {
-        return FragmentLikedBinding.inflate(getLayoutInflater());
+    protected FragmentSearchBinding inflateBinding() {
+        return FragmentSearchBinding.inflate(getLayoutInflater());
     }
 
     @Override

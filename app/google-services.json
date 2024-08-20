@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "414139655666",
+    "project_id": "retromusic-5ed23",
+    "storage_bucket": "retromusic-5ed23.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414139655666:android:52265f9d569f7132d4b76b",
+        "android_client_info": {
+          "package_name": "com.lampro.mymusic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7EMDhCSUdWKdkLlSMG6gbfsFDqWibMqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

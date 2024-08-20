@@ -1,6 +1,7 @@
 package com.lampro.mymusic.utils;
 
 import static com.lampro.mymusic.MyApplication.CHANNEL_ID;
+import static com.lampro.mymusic.MyApplication.context;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -11,12 +12,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.media.session.MediaSessionCompat;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.core.app.NotificationCompat;
@@ -28,6 +31,7 @@ import com.lampro.mymusic.model.Song;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 public class MusicService extends Service {
 
@@ -39,7 +43,7 @@ public class MusicService extends Service {
     public static final String PREVIOUS = "PREVIOUS";
     public static final String MUTED = "MUTED";
     public static final String UNMUTED = "UNMUTED";
-    public static final String SEND_ACTION_TO_ACTIVITY = "SEND_ACTION_TO_ACTIVITY";
+    public static final String SEND_ACTION_TO_ACTIVITY = "com.lampro.mymusic.utils.SEND_ACTION_TO_ACTIVITY";
 
     private MediaPlayer mediaPlayer;
     private List<Song> listSong;
@@ -50,10 +54,18 @@ public class MusicService extends Service {
 
     private MediaSessionCompat mediaSession;
 
+    private MusicBinder musicBinder = new MusicBinder();
+
+    public class MusicBinder extends Binder {
+        public MusicService getMusicService() {
+            return MusicService.this;
+        }
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return musicBinder;
     }
 
     public MediaPlayer getMediaPlayer() {
@@ -67,7 +79,7 @@ public class MusicService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
 
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
@@ -82,21 +94,22 @@ public class MusicService extends Service {
 
             assert listSong != null;
             song = listSong.get(position);
-            String actionMusic = intent.getAction();
-            handleActionMusic(actionMusic);
-
 
         }
+
+        String actionMusic = intent.getAction();
+        assert actionMusic != null;
+        handleActionMusic(actionMusic);
 
 
         return START_STICKY;
     }
 
+
     private void handleActionMusic(String action) {
         switch (action) {
             case START:
                 startMusic(song.getUriSong());
-                sendNotificationMedia(song);
                 break;
             case PLAY:
                 playMusic();
@@ -117,7 +130,8 @@ public class MusicService extends Service {
                 unMutedMusic();
                 break;
             case CLEAR:
-                stopSelf();
+//                stopSelf();
+                clearMusic();
                 break;
         }
     }
@@ -141,25 +155,28 @@ public class MusicService extends Service {
         isMuted = false;
         mediaPlayer.start();
         sendActionToActivity(START);
+        sendNotificationMedia(song);
 
     }
 
-    private void playMusic() {
+    public void playMusic() {
         if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             sendActionToActivity(PLAY);
+            sendNotificationMedia(song);
         }
 
     }
 
-    private void pauseMusic() {
+    public void pauseMusic() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             sendActionToActivity(PAUSE);
+            sendNotificationMedia(song);
         }
     }
 
-    private void previousMusic() {
+    public void previousMusic() {
         if (position == 0) {
             position = listSong.size();
         }
@@ -168,7 +185,7 @@ public class MusicService extends Service {
         startMusic(song.getUriSong());
     }
 
-    private void nextMusic() {
+    public void nextMusic() {
         if (position == listSong.size() - 1) {
             position = -1;
         }
@@ -177,16 +194,25 @@ public class MusicService extends Service {
         startMusic(song.getUriSong());
     }
 
-    private void mutedMusic() {
+    public void mutedMusic() {
         mediaPlayer.setVolume(0f, 0f);
         isMuted = true;
         sendActionToActivity(MUTED);
     }
 
-    private void unMutedMusic() {
+    public void unMutedMusic() {
         mediaPlayer.setVolume(1f, 1f);
         isMuted = false;
         sendActionToActivity(UNMUTED);
+    }
+
+    public void clearMusic() {
+        sendActionToActivity(CLEAR);
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        stopSelf();
     }
 
     @SuppressLint("ForegroundServiceType")
@@ -200,7 +226,8 @@ public class MusicService extends Service {
 //        }
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.diem_xua);
 
-        Intent intentPlayPause = new Intent(this, MusicReceiver.class);
+
+        Intent intentPlayPause = new Intent(this, MusicService.class);
         int icon;
         if (mediaPlayer.isPlaying()) {
             icon = R.drawable.ic_pause;
@@ -211,15 +238,24 @@ public class MusicService extends Service {
         }
 
 
-        PendingIntent playPausePendingIntent = PendingIntent.getBroadcast(this, 0, intentPlayPause, PendingIntent.FLAG_IMMUTABLE);
 
-        Intent previousIntent = new Intent(this, MusicReceiver.class).setAction(PREVIOUS);
-        PendingIntent previousPendingIntent = PendingIntent.getBroadcast(this, 0, previousIntent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent playPausePendingIntent = PendingIntent.getService(context.getApplicationContext(),
+                0, intentPlayPause, PendingIntent.FLAG_IMMUTABLE);
 
-        Intent nextIntent = new Intent(this, MusicReceiver.class).setAction(NEXT);
-        PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this, 0, nextIntent, PendingIntent.FLAG_IMMUTABLE);
+        Intent previousIntent = new Intent(this, MusicService.class).setAction(PREVIOUS);
+        PendingIntent previousPendingIntent = PendingIntent.getService(this, 1,
+                previousIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent nextIntent = new Intent(this, MusicService.class).setAction(NEXT);
+        PendingIntent nextPendingIntent = PendingIntent.getService(this, 2,
+                nextIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent clearIntent = new Intent(this, MusicService.class).setAction(CLEAR);
+        PendingIntent clearPendingIntent = PendingIntent.getService(this, 3,
+                clearIntent, PendingIntent.FLAG_MUTABLE);
 
         mediaSession = new MediaSessionCompat(this, "MusicService");
+        mediaSession.setActive(true);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -231,15 +267,17 @@ public class MusicService extends Service {
                 .addAction(R.drawable.ic_previous, "Previous", previousPendingIntent)
                 .addAction(icon, "Play,Pause", playPausePendingIntent)
                 .addAction(R.drawable.ic_next, "Next", nextPendingIntent)
+                .addAction(R.drawable.ic_clear,"Clear", clearPendingIntent)
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(1)
                         .setMediaSession(mediaSession.getSessionToken())
                 )
                 .build();
-        initMediaSession();
+//        initMediaSession();
 
         startForeground(1, notification);
     }
+
 
     private void initMediaSession() {
 
@@ -247,9 +285,6 @@ public class MusicService extends Service {
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
             public void onPlay() {
-                Intent intentPlayPause = new Intent(getBaseContext(), MusicService.class);
-                intentPlayPause.setAction(PLAY);
-                PendingIntent playPausePendingIntent = PendingIntent.getService(getBaseContext(), 0, intentPlayPause, PendingIntent.FLAG_IMMUTABLE);
             }
 
             @Override
@@ -268,16 +303,21 @@ public class MusicService extends Service {
             public void onSkipToPrevious() {
                 // Handle previous action
             }
+
+            @Override
+            public void onStop() {
+                super.onStop();
+            }
         });
 
         mediaSession.setActive(true);
     }
 
-    private void sendActionToActivity(String action) {
+    public void sendActionToActivity(String action) {
         Intent intent = new Intent(SEND_ACTION_TO_ACTIVITY);
-        intent.setAction(action);
 
         Bundle bundle = new Bundle();
+        bundle.putString("action", action);
         bundle.putBoolean("isMuted", isMuted);
         bundle.putBoolean("isPlaying", mediaPlayer.isPlaying());
         bundle.putParcelable("songPlaying", song);
@@ -294,6 +334,7 @@ public class MusicService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        mediaSession.release();
     }
 
 }

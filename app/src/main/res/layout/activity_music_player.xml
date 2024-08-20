@@ -4,6 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="songPlaying"
+            type="com.lampro.mymusic.model.Song" />
 
     </data>
 
@@ -118,7 +121,8 @@
                         android:ellipsize="end"
                         android:lines="1"
                         android:maxWidth="@dimen/_200sdp"
-                        android:text="@string/xuan_thi"
+                        android:text="@{songPlaying.name}"
+                        tools:text="@string/xuan_thi"
                         android:textColor="@color/white"
                         android:textSize="@dimen/_18sdp"
                         android:textStyle="bold" />
@@ -129,7 +133,8 @@
                         android:ellipsize="end"
                         android:lines="1"
                         android:maxWidth="@dimen/_200sdp"
-                        android:text="@string/bui_anh_tuan"
+                        android:text="@{songPlaying.artist}"
+                        tools:text="@string/bui_anh_tuan"
                         android:textColor="@color/white" />
 
 
@@ -145,23 +150,25 @@
                     android:src="@drawable/ic_list_songs" />
 
                 <ImageView
+                    android:id="@+id/img_ic_share"
                     android:layout_width="@dimen/_20sdp"
                     android:layout_height="@dimen/_20sdp"
                     android:layout_alignTop="@+id/ll_title"
                     android:layout_alignBottom="@+id/ll_title"
-                    android:layout_marginRight="@dimen/_15sdp"
-                    android:layout_toLeftOf="@id/img_list_songs"
+                    android:layout_marginEnd="@dimen/_15sdp"
+                    android:layout_toStartOf="@id/img_list_songs"
                     android:src="@drawable/ic_export" />
 
                 <SeekBar
                     android:id="@+id/seekbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/ll_title"
                     android:layout_alignParentStart="true"
-                    android:layout_marginLeft="@dimen/_minus7sdp"
+                    android:layout_alignTop="@id/tv_time"
+                    android:layout_marginStart="@dimen/_minus7sdp"
                     android:layout_toStartOf="@id/tv_time"
                     android:indeterminate="false"
+                    android:layout_alignBottom="@id/tv_time"
                     android:maxHeight="@dimen/_6sdp"
                     android:minHeight="@dimen/_6sdp"
                     android:paddingVertical="@dimen/_5sdp"
@@ -171,11 +178,15 @@
 
                 <TextView
                     android:id="@+id/tv_time"
-                    android:layout_width="wrap_content"
+                    android:layout_width="@dimen/_40sdp"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/ll_title"
-                    android:layout_alignParentRight="true"
-                    android:text="-1:40" />
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:textColor="@color/white"
+                    android:layout_alignParentEnd="true"
+                    android:textAlignment="center"
+                    android:text="@{songPlaying.duration}"
+                    tools:text="-1:40" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_marginVertical="@dimen/_5sdp"
@@ -197,9 +208,11 @@
                         app:layout_constraintTop_toTopOf="parent">
 
                         <ImageView
+                            android:id="@+id/img_ic_play_or_pause"
                             android:layout_width="@dimen/_50sdp"
                             android:layout_height="@dimen/_50sdp"
                             android:background="@color/white"
+                            android:contentDescription="@string/play"
                             android:padding="@dimen/_14sdp"
                             android:src="@drawable/pause" />
                     </androidx.cardview.widget.CardView>

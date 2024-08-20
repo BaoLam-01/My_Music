@@ -29,7 +29,6 @@
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/nav_bottom"
             android:visibility="gone" />
 
         <LinearLayout
@@ -40,6 +39,7 @@
             android:layout_marginHorizontal="@dimen/_10sdp"
             android:layout_marginBottom="@dimen/_10sdp"
             android:background="@drawable/music_playing_frame"
+            android:visibility="invisible"
             android:clickable="true"
             android:orientation="vertical">
 

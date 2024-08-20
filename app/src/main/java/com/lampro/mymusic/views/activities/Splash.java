@@ -28,11 +28,16 @@ public class Splash extends BaseActivity<ActivitySplashBinding> {
         EdgeToEdge.enable(this);
 
 
-        new Handler().postDelayed(() -> {
+//        new Handler().postDelayed(() -> {
+//            Intent intent = new Intent(Splash.this, MainActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }, 2000);
+        new Handler().post(() -> {
             Intent intent = new Intent(Splash.this, MainActivity.class);
             startActivity(intent);
             finish();
-        },0000);
+        });
     }
 
     @Override

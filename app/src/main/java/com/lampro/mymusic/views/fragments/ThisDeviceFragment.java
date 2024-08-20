@@ -182,7 +182,7 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
 
     @Override
     public void onRequestSuccess() {
-        mThisDeviceViewModel.getAllSongs(getContext().getContentResolver());
+        mThisDeviceViewModel.getAllSongs(requireContext().getContentResolver());
     }
 
 

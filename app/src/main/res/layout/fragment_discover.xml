@@ -14,11 +14,12 @@
         tools:context=".views.fragments.DiscoverFragment">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:background="@color/white"
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:paddingTop="@dimen/_30sdp">
+            android:paddingTop="@dimen/_20sdp">
 
             <androidx.appcompat.widget.Toolbar
                 android:layout_width="match_parent"
