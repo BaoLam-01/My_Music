@@ -1,6 +1,11 @@
 package com.lampro.mymusic.model;
 
 public class Playlist {
+    private int playlistId;
+    private int userId;
+    private String tittle;
+    private String creationDate;
+
     private int img, songCount;
     private String title, Singers;
 

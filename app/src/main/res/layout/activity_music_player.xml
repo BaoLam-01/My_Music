@@ -17,10 +17,11 @@
         tools:context=".views.activities.MusicPlayerActivity">
 
         <ImageView
+            android:id="@+id/img_bg_music_playing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/xuan_thi_ha_anh_tuan" />
+            android:src="@drawable/img_bg_music_playing" />
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
@@ -41,6 +42,8 @@
                     android:gravity="center_vertical">
 
                     <ImageView
+                        android:id="@+id/ibtn_hide"
+                        android:padding="@dimen/_5sdp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
@@ -185,7 +188,7 @@
                     android:textColor="@color/white"
                     android:layout_alignParentEnd="true"
                     android:textAlignment="center"
-                    android:text="@{songPlaying.duration}"
+                    android:text="@{songPlaying.typeDuration}"
                     tools:text="-1:40" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -225,7 +228,8 @@
                         android:src="@drawable/ic_volume_hight"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/white" />
 
 
                     <ImageView

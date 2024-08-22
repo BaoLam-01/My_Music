@@ -8,6 +8,7 @@ import static com.lampro.mymusic.utils.MusicService.SEND_ACTION_TO_ACTIVITY;
 import static com.lampro.mymusic.utils.MusicService.START;
 import static com.lampro.mymusic.utils.MusicService.UNMUTED;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,12 +16,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.SeekBar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -40,7 +46,7 @@ import com.lampro.mymusic.utils.MusicService;
 import eightbitlab.com.blurview.RenderEffectBlur;
 import eightbitlab.com.blurview.RenderScriptBlur;
 
-public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding> implements View.OnClickListener{
+public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding> implements View.OnClickListener {
 
 
     private boolean isMuted;
@@ -50,11 +56,17 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
     private MusicService musicService;
     private boolean isConnected = false;
 
+    private Runnable updateSeekBar;
+    private final Handler handler = new Handler();
+
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MusicService.MusicBinder musicBinder = (MusicService.MusicBinder) service;
             musicService = musicBinder.getMusicService();
+            if (musicService.getMediaPlayer() != null) {
+                musicService.sendActionToActivity(START);
+            }
             isConnected = true;
 
         }
@@ -85,11 +97,12 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
     };
 
 
-
     private void handlerActionMusic(String actionMusic) {
         switch (actionMusic) {
             case START:
-                binding.setSongPlaying(songPlaying);
+                initView();
+                binding.seekbar.setMax(musicService.getMediaPlayer().getDuration());
+                updateSeekBar.run();
                 setStatusButtonPlayOrPause();
                 break;
             case PLAY:
@@ -129,12 +142,11 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
-        songPlaying = getIntent().getParcelableExtra("songPlaying");
-        if (songPlaying != null) {
-            binding.setSongPlaying(songPlaying);
-        }
+
+        initView();
 
         bindMusicService();
 
@@ -161,11 +173,28 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
 
     }
 
+    private void initView() {
+        if (songPlaying != null) {
+
+            binding.setSongPlaying(songPlaying);
+
+            if (songPlaying.getImg() != null) {
+                binding.imgBgMusicPlaying.setImageBitmap(songPlaying.getImg());
+            } else
+                binding.imgBgMusicPlaying.setImageResource(R.drawable.img_bg_music_playing);
+        }
+    }
+
     private void listener() {
+        updateSeekBar();
+
         binding.imgIcPrevious.setOnClickListener(this);
         binding.imgIcNext.setOnClickListener(this);
         binding.imgIcPlayOrPause.setOnClickListener(this);
         binding.imgVlHight.setOnClickListener(this);
+        binding.ibtnHide.setOnClickListener(this);
+
+
     }
 
     @Override
@@ -190,10 +219,14 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
                 musicService.mutedMusic();
             }
         }
+        if ((v.getId() == R.id.ibtn_hide)) {
+            finish();
+            overridePendingTransition(R.anim.slide_down,R.anim.fade_out);
+        }
     }
 
     private void bindMusicService() {
-        Intent musicIntent = new Intent(this,MusicService.class);
+        Intent musicIntent = new Intent(this, MusicService.class);
         bindService(musicIntent, serviceConnection, BIND_AUTO_CREATE);
     }
 
@@ -203,14 +236,52 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(SEND_ACTION_TO_ACTIVITY));
     }
 
+    private void updateSeekBar() {
+        binding.seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && musicService != null) {
+                    musicService.setProgress(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+//      Cap nhat seekbar theo tien trinh bai nhac
+        updateSeekBar = new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    binding.seekbar.setProgress(musicService.getCurrentPosMediaPlayer());
+                }
+                handler.postDelayed(this, 1000);
+            }
+        };
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+//        overridePendingTransition(R.anim.fade_out, R.anim.slide_down);
+
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        handler.removeCallbacks(updateSeekBar);
         if (isConnected) {
             isConnected = false;
             unbindService(serviceConnection);
         }
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+
     }
 
 

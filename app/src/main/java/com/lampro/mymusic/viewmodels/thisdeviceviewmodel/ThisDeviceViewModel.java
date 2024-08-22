@@ -1,6 +1,8 @@
 package com.lampro.mymusic.viewmodels.thisdeviceviewmodel;
 
+import android.app.AlertDialog;
 import android.app.Application;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -33,6 +35,8 @@ public class ThisDeviceViewModel extends AndroidViewModel {
     }
 
     public void getAllSongs(ContentResolver contentResolver) {
+
+
         List<Song> songs = new ArrayList<>();
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {MediaStore.Audio.Media._ID,
@@ -46,6 +50,7 @@ public class ThisDeviceViewModel extends AndroidViewModel {
         String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
 
         Cursor cursor = contentResolver.query(uri, projection, selection, null, sortOrder);
+        assert cursor != null;
         cursor.moveToFirst();
 
         int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
@@ -77,6 +82,7 @@ public class ThisDeviceViewModel extends AndroidViewModel {
 
         } while (cursor.moveToNext());
         liveDataListSong.setValue(songs);
+
     }
 
     private Uri getSongUri(Context context, Long songId) {

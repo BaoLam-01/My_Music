@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +32,7 @@ import com.lampro.mymusic.R;
 import com.lampro.mymusic.model.Song;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
@@ -76,6 +79,7 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
     }
 
     @Override
@@ -224,7 +228,12 @@ public class MusicService extends Service {
 //        } catch (FileNotFoundException e) {
 //            throw new RuntimeException(e);
 //        }
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.diem_xua);
+
+        Bitmap bitmap = null;
+        if (song.getImg() != null) {
+            bitmap = song.getImg();
+        }
+        else bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.img_music_notification);
 
 
         Intent intentPlayPause = new Intent(this, MusicService.class);
@@ -236,8 +245,6 @@ public class MusicService extends Service {
             icon = R.drawable.ic_play;
             intentPlayPause.setAction(PLAY);
         }
-
-
 
         PendingIntent playPausePendingIntent = PendingIntent.getService(context.getApplicationContext(),
                 0, intentPlayPause, PendingIntent.FLAG_IMMUTABLE);
@@ -255,15 +262,14 @@ public class MusicService extends Service {
                 clearIntent, PendingIntent.FLAG_MUTABLE);
 
         mediaSession = new MediaSessionCompat(this, "MusicService");
-        mediaSession.setActive(true);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_ic_mymusic_app)
+                .setSmallIcon(R.drawable.ic_mymusic_app)
                 .setSubText("My Music")
                 .setContentTitle(song.getName())
                 .setContentText(song.getArtist())
-                .setLargeIcon(song.getImg())
+                .setLargeIcon(bitmap)
                 .addAction(R.drawable.ic_previous, "Previous", previousPendingIntent)
                 .addAction(icon, "Play,Pause", playPausePendingIntent)
                 .addAction(R.drawable.ic_next, "Next", nextPendingIntent)
@@ -273,7 +279,6 @@ public class MusicService extends Service {
                         .setMediaSession(mediaSession.getSessionToken())
                 )
                 .build();
-//        initMediaSession();
 
         startForeground(1, notification);
     }
@@ -284,29 +289,8 @@ public class MusicService extends Service {
 
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
-            public void onPlay() {
-            }
-
-            @Override
-            public void onPause() {
-                Intent intentPlayPause = new Intent(getBaseContext(), MusicService.class);
-                intentPlayPause.setAction(PAUSE);
-                PendingIntent playPausePendingIntent = PendingIntent.getService(getBaseContext(), 0, intentPlayPause, PendingIntent.FLAG_IMMUTABLE);
-            }
-
-            @Override
-            public void onSkipToNext() {
-                // Handle next action
-            }
-
-            @Override
-            public void onSkipToPrevious() {
-                // Handle previous action
-            }
-
-            @Override
-            public void onStop() {
-                super.onStop();
+            public void onSeekTo(long pos) {
+                super.onSeekTo(pos);
             }
         });
 
@@ -324,6 +308,13 @@ public class MusicService extends Service {
 
         intent.putExtras(bundle);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    public void setProgress(int progress) {
+        mediaPlayer.seekTo(progress);
+    }
+
+    public int getCurrentPosMediaPlayer() {
+        return mediaPlayer.getCurrentPosition();
     }
 
     @Override

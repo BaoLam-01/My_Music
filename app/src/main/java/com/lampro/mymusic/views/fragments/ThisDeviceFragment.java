@@ -2,6 +2,7 @@ package com.lampro.mymusic.views.fragments;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -68,6 +69,7 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
 
     private ThisDeviceViewModel mThisDeviceViewModel;
 
+
     public ThisDeviceFragment() {
         // Required empty public constructor
     }
@@ -124,7 +126,7 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
 
         initViewModel();
 
-        mThisDeviceViewModel.liveDataListSong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
+                mThisDeviceViewModel.liveDataListSong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
             @Override
             public void onChanged(List<Song> songs) {
                 mThisDeviceSong.updateData(songs);
@@ -134,9 +136,6 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
 
         mainActivity.setCallback(this);
         mainActivity.checkSelfPermission();
-
-
-
 
     }
 

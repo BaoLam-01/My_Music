@@ -118,11 +118,15 @@ public class Song implements Parcelable {
         this.album = album;
     }
 
-    public String getDuration() {
+    public String getTypeDuration() {
         int dura = Integer.parseInt(duration);
-        int minute = dura / 60;
-        int second = dura % 60;
+        int minute = (dura / 1000) / 60;
+        int second = (dura / 1000) % 60;
         String duration = String.format("%02d:%02d", minute, second);
+        return duration;
+    }
+
+    public String getDuration() {
         return duration;
     }
 

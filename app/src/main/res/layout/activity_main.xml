@@ -147,7 +147,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:paddingHorizontal="@dimen/_8sdp"
-                    android:text="@{songPlaying.duration}"
+                    android:text="@{songPlaying.typeDuration}"
                     tools:text="@string/_1_40" />
 
 
