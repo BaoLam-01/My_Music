@@ -9,6 +9,7 @@ import static com.lampro.mymusic.utils.MusicService.START;
 import static com.lampro.mymusic.utils.MusicService.UNMUTED;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,7 +17,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,38 +25,56 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.databinding.ViewDataBinding;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewbinding.ViewBinding;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.adapters.ViewPagerAdapter;
 import com.lampro.mymusic.base.BaseActivity;
 import com.lampro.mymusic.databinding.ActivityMainBinding;
+import com.lampro.mymusic.databinding.LayoutHeaderNavBinding;
 import com.lampro.mymusic.interfaces.IOnClickItemSong;
 import com.lampro.mymusic.model.Song;
 import com.lampro.mymusic.utils.MusicService;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
-public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener, IOnClickItemSong {
+public class MainActivity extends BaseActivity<ActivityMainBinding> implements View.OnClickListener,
+        IOnClickItemSong, NavigationView.OnNavigationItemSelectedListener {
 
     public static final int MY_REQUEST_CODE = 10;
     public static final int REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK = 1;
 
-    private BottomNavigationView navigationView;
+    private Toolbar toolbar;
+    private NavigationView navigationView;
+
+    private BottomNavigationView bottomNav;
     private ViewPager2 vpContent;
 
     private OnRequestPermission onRequestPermission;
@@ -155,6 +174,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     }
 
     private void initView() {
+        toolbar = binding.toolbar;
+        setSupportActionBar(toolbar);
+        navigationView = binding.navigationView;
 
 
         vpContent = binding.vpContent;
@@ -162,25 +184,93 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         vpContent.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         vpContent.setUserInputEnabled(false);
 
-        navigationView = binding.navBottom;
+        bottomNav = binding.navBottom;
+
+        showUserInfor();
 
     }
 
+    private void showUserInfor() {
+
+        TextView tvName = navigationView.getHeaderView(0).findViewById(R.id.tv_user_namne);
+        TextView tvEmail = navigationView.getHeaderView(0).findViewById(R.id.tv_email);
+        ImageView imgAvata = navigationView.getHeaderView(0).findViewById(R.id.img_avatar);
+
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        assert user != null;
+        String userName = user.getDisplayName();
+        String email = user.getEmail();
+        Uri photoUrl = user.getPhotoUrl();
+
+
+        tvName.setVisibility(View.VISIBLE);
+        tvName.setText(userName);
+        tvEmail.setText(email);
+        Glide.with(this).load(photoUrl).error(R.drawable.user_default).into(imgAvata);
+    }
+
     private void listener() {
-        navigationView.setOnItemSelectedListener(v -> {
+        binding.imgProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                binding.drawerLayout.openDrawer(GravityCompat.END);
+            }
+        });
+
+//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                binding.drawerLayout.openDrawer(GravityCompat.END);
+//            }
+//        });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    () -> {
+                        // Xử lý sự kiện quay lại
+                        if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                            binding.drawerLayout.closeDrawer(GravityCompat.END);
+                        } else {
+                            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+
+                                Intent intent = new Intent(Intent.ACTION_MAIN);
+                                intent.addCategory(Intent.CATEGORY_HOME);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                                // Khởi động Activity mới
+                                startActivity(intent);
+                            } else {
+                                getSupportFragmentManager().popBackStack();
+                            }
+                        }
+                    }
+            );
+        }
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        bottomNav.setOnItemSelectedListener(v -> {
 
 
             if (v.getItemId() == R.id.discover) {
                 vpContent.setCurrentItem(0);
+                setViewToolBar(R.id.discover);
                 setViewGone();
             } else if (v.getItemId() == R.id.liked) {
                 vpContent.setCurrentItem(1);
+                setViewToolBar(R.id.liked);
                 setViewGone();
             } else if (v.getItemId() == R.id.playlist) {
                 vpContent.setCurrentItem(2);
+                setViewToolBar(R.id.playlist);
                 setViewGone();
             } else {
                 vpContent.setCurrentItem(3);
+                setViewToolBar(R.id.setting);
                 setViewGone();
             }
 
@@ -209,7 +299,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         updateSeekBar = new Runnable() {
             @Override
             public void run() {
-                if (musicService != null) {
+                if (musicService.getMediaPlayer() != null) {
                     binding.seekbar.setProgress(musicService.getCurrentPosMediaPlayer());
                 }
                 handler.postDelayed(this, 1000);
@@ -224,6 +314,58 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
     }
 
+    private void setViewToolBar(int id) {
+        if (id == R.id.discover) {
+            Calendar calendar = Calendar.getInstance();
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            if (hour < 12) {
+
+                binding.tvToolbar.setText(R.string.good_morning);
+            } else if (hour < 18) {
+
+                binding.tvToolbar.setText(R.string.good_afternoon);
+            } else {
+                binding.tvToolbar.setText(R.string.good_evening);
+            }
+
+            setVisibleAppbarLayout();
+        } else if (id == R.id.liked) {
+
+            binding.tvToolbar.setText(R.string.liked);
+            setVisibleAppbarLayout();
+
+        } else if (id == R.id.playlist) {
+            binding.tvToolbar.setText(R.string.playlists);
+            setVisibleAppbarLayout();
+
+        } else {
+            binding.tvToolbar.setText(R.string.settings);
+            setVisibleAppbarLayout();
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.add_account) {
+
+        } else if (id == R.id.news) {
+
+        } else if (id == R.id.history) {
+
+        } else {
+            FirebaseAuth.getInstance().signOut();
+            goToLogin();
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.END);
+        return true;
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(this, LoginAndRegisterActivity.class);
+        startActivity(intent);
+        finishAffinity();
+    }
 
     @Override
     public void onClick(View v) {
@@ -232,7 +374,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
             Intent intent = new Intent(MainActivity.this, MusicPlayerActivity.class);
             startActivity(intent);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                overridePendingTransition(R.anim.slide_up, 0);
+                overridePendingTransition(R.anim.slide_up | R.anim.fade_in, 0);
             }
 
         }
@@ -264,6 +406,14 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         binding.fragmentContainer.setVisibility(View.GONE);
         getSupportFragmentManager()
                 .popBackStack();
+    }
+
+    public void setHideAppbarLayout() {
+        binding.appbar.setVisibility(View.GONE);
+    }
+
+    public void setVisibleAppbarLayout() {
+        binding.appbar.setVisibility(View.VISIBLE);
     }
 
     public void checkSelfPermission() {
@@ -373,7 +523,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         switch (action) {
             case START:
                 binding.setSongPlaying(songPlaying);
-                binding.seekbar.setMax(musicService.getMediaPlayer().getDuration());
+                if (musicService.getMediaPlayer() != null) {
+                    binding.seekbar.setMax(musicService.getMediaPlayer().getDuration());
+                }
                 updateSeekBar.run();
                 binding.llFramePlaying.setVisibility(View.VISIBLE);
                 setStatusButtonPlayOrPause();
@@ -393,6 +545,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                 break;
             case CLEAR:
                 binding.llFramePlaying.setVisibility(View.GONE);
+                handler.removeCallbacks(updateSeekBar);
                 if (isServiceConnected) {
                     unbindService(serviceConnection);
                     isServiceConnected = false;
@@ -426,6 +579,27 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         if (isServiceConnected) {
             unbindService(serviceConnection);
             isServiceConnected = false;
+        }
+    }
+
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.END);
+        } else {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                // Khởi động Activity mới
+                startActivity(intent);
+            } else {
+                getSupportFragmentManager().popBackStack();
+            }
         }
     }
 }

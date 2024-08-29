@@ -51,7 +51,7 @@ import java.util.List;
  * Use the {@link ThisDeviceFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> implements MainActivity.OnRequestPermission{
+public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> implements MainActivity.OnRequestPermission {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -68,6 +68,7 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     private MainActivity mainActivity;
 
     private ThisDeviceViewModel mThisDeviceViewModel;
+
 
 
     public ThisDeviceFragment() {
@@ -118,15 +119,13 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
         super.onViewCreated(view, savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
-
-
         mThisDeviceSong = new ThisDeviceSongAdapter(mainActivity);
 
         initview();
 
         initViewModel();
 
-                mThisDeviceViewModel.liveDataListSong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
+        mThisDeviceViewModel.liveDataListSong.observe(getViewLifecycleOwner(), new Observer<List<Song>>() {
             @Override
             public void onChanged(List<Song> songs) {
                 mThisDeviceSong.updateData(songs);
@@ -140,43 +139,24 @@ public class ThisDeviceFragment extends BaseFragment<FragmentThisDeviceBinding> 
     }
 
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-////
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//            if (Environment.isExternalStorageManager()) {
-//                onRequestSuccess();
-//
-//            }
-//        } else {
-//            // Các quyền khác cho Android dưới 11
-//            if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-//                    == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_MEDIA_AUDIO)
-//                    == PackageManager.PERMISSION_GRANTED) {
-//                onRequestSuccess();
-//            }
-//        }
-//    }
-
-
     private void initview() {
 
+        mainActivity.setHideAppbarLayout();
+
         int top = getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._10sdp);
-        int bottom = getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._80sdp);
+        int bottom = getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._60sdp);
         CustomItemSongDecoration customItemDecoration = new CustomItemSongDecoration(top, bottom);
 
         binding.rvSongs.setAdapter(mThisDeviceSong);
-        binding.rvSongs.setLayoutManager(new LinearLayoutManager(this.requireContext(),LinearLayoutManager.VERTICAL,false));
+        binding.rvSongs.setLayoutManager(new LinearLayoutManager(this.requireContext(), LinearLayoutManager.VERTICAL, false));
         binding.rvSongs.addItemDecoration(customItemDecoration);
     }
 
     private void initViewModel() {
-        Application application  = getActivity().getApplication();
+        Application application = getActivity().getApplication();
         ThisDeviceViewModelFactory thisDeviceViewModelFactory = new ThisDeviceViewModelFactory(application);
         mThisDeviceViewModel = new ViewModelProvider(this, thisDeviceViewModelFactory).get(ThisDeviceViewModel.class);
     }
-
 
 
     @Override

@@ -101,7 +101,9 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
         switch (actionMusic) {
             case START:
                 initView();
-                binding.seekbar.setMax(musicService.getMediaPlayer().getDuration());
+                if (musicService.getMediaPlayer() != null) {
+                    binding.seekbar.setMax(musicService.getMediaPlayer().getDuration());
+                }
                 updateSeekBar.run();
                 setStatusButtonPlayOrPause();
                 break;
@@ -115,6 +117,7 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
                 break;
             case CLEAR:
                 finish();
+                handler.removeCallbacks(updateSeekBar);
                 break;
         }
     }
@@ -152,6 +155,12 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
 
         listener();
 
+        setBackgroundBlur();
+
+
+    }
+
+    private void setBackgroundBlur() {
         float radius = 10f;
 
         View decorView = getWindow().getDecorView();
@@ -169,8 +178,6 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
                     .setFrameClearDrawable(windowBackground) // Optional
                     .setBlurRadius(radius);
         }
-
-
     }
 
     private void initView() {
@@ -277,6 +284,7 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(updateSeekBar);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         if (isConnected) {
             isConnected = false;
             unbindService(serviceConnection);

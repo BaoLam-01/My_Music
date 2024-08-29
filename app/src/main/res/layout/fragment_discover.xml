@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -7,77 +8,26 @@
 
     </data>
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/backgorud_color"
+        android:background="@color/background_color"
         tools:context=".views.fragments.DiscoverFragment">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:background="@color/white"
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:paddingTop="@dimen/_20sdp">
-
-            <androidx.appcompat.widget.Toolbar
-                android:layout_width="match_parent"
-                android:elevation="@dimen/_5sdp"
-                android:layout_height="?attr/actionBarSize">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="@dimen/_5sdp"
-                        android:text="@string/toolbar_title"
-                        android:textColor="@color/black"
-                        android:textSize="@dimen/_15sdp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:id="@+id/img_notification"
-                        android:layout_width="@dimen/_15sdp"
-                        android:layout_height="@dimen/_15sdp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="@dimen/_10sdp"
-                        android:layout_toLeftOf="@id/img_profile"
-                        android:src="@drawable/notification" />
-
-                    <ImageView
-                        android:id="@+id/img_profile"
-                        android:layout_width="@dimen/_15sdp"
-                        android:layout_height="@dimen/_15sdp"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="@dimen/_15sdp"
-                        android:src="@drawable/profile_circle" />
-
-
-                </RelativeLayout>
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.google.android.material.appbar.AppBarLayout>
-
         <ScrollView
-            android:scrollbars="none"
-            android:layout_below="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:scrollbars="none"
+            tools:ignore="UselessParent">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                tools:ignore="ScrollViewSize">
 
                 <LinearLayout
+                    android:layout_marginTop="@dimen/_60sdp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
@@ -108,7 +58,8 @@
                             android:text="@string/tv_see_all"
                             android:textColor="@android:color/holo_blue_dark"
                             android:textSize="@dimen/_10ssp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="RelativeOverlap" />
 
 
                     </RelativeLayout>
@@ -150,7 +101,8 @@
                             android:text="@string/tv_see_all"
                             android:textColor="@android:color/holo_blue_dark"
                             android:textSize="@dimen/_10ssp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="RelativeOverlap" />
 
 
                     </RelativeLayout>
@@ -192,7 +144,8 @@
                             android:text="@string/tv_see_all"
                             android:textColor="@android:color/holo_blue_dark"
                             android:textSize="@dimen/_10ssp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="RelativeOverlap" />
 
 
                     </RelativeLayout>
@@ -204,9 +157,9 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_marginBottom="@dimen/_80sdp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/_60sdp"
                     android:orientation="vertical">
 
                     <RelativeLayout
@@ -235,19 +188,21 @@
                             android:text="@string/tv_see_all"
                             android:textColor="@android:color/holo_blue_dark"
                             android:textSize="@dimen/_10ssp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="RelativeOverlap" />
 
 
                     </RelativeLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_recently"
-                        android:layout_marginHorizontal="@dimen/_15sdp"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/_300sdp" />
+                        android:layout_height="@dimen/_300sdp"
+                        android:layout_marginHorizontal="@dimen/_15sdp" />
                 </LinearLayout>
 
             </LinearLayout>
         </ScrollView>
-    </RelativeLayout>
+    </FrameLayout>
+
 </layout>

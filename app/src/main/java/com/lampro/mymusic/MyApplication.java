@@ -13,11 +13,11 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        getContext();
+        context = getApplicationContext();
         createNotificationChannel();
     }
-    public void getContext() {
-        this.context = getApplicationContext();
+    public static Context getContext() {
+        return context;
     }
 
     private void createNotificationChannel() {

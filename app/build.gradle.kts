@@ -63,6 +63,11 @@ dependencies {
     // firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation ("com.airbnb.android:lottie:6.4.1")
+
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
 
 
 }

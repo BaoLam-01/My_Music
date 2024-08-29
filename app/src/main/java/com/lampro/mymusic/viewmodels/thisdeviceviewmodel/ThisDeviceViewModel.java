@@ -81,6 +81,7 @@ public class ThisDeviceViewModel extends AndroidViewModel {
             songs.add(new Song(img, id, title, artist, album, duration, data, getUri));
 
         } while (cursor.moveToNext());
+        cursor.close();
         liveDataListSong.setValue(songs);
 
     }

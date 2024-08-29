@@ -23,7 +23,7 @@
         android:theme="@style/Theme.MyMusic"
         tools:targetApi="31">
         <activity
-            android:name=".views.activities.StartActivity"
+            android:name=".views.activities.LoginAndRegisterActivity"
             android:exported="false" />
         <activity
             android:name=".views.activities.MusicPlayerActivity"
@@ -44,7 +44,6 @@
         <service
             android:name=".utils.MusicService"
             android:foregroundServiceType="mediaPlayback" />
-
     </application>
 
 </manifest>

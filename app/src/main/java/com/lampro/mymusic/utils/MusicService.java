@@ -259,7 +259,7 @@ public class MusicService extends Service {
 
         Intent clearIntent = new Intent(this, MusicService.class).setAction(CLEAR);
         PendingIntent clearPendingIntent = PendingIntent.getService(this, 3,
-                clearIntent, PendingIntent.FLAG_MUTABLE);
+                clearIntent, PendingIntent.FLAG_IMMUTABLE);
 
         mediaSession = new MediaSessionCompat(this, "MusicService");
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -325,7 +325,9 @@ public class MusicService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        mediaSession.release();
+        if (mediaSession != null) {
+            mediaSession.release();
+        }
     }
 
 }

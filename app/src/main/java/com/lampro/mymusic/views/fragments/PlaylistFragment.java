@@ -40,6 +40,7 @@ import com.lampro.mymusic.viewmodels.playlistviewmodel.PlaylistViewModelFactory;
 import com.lampro.mymusic.views.activities.MainActivity;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> implements PlaylistAdapter.IOnPlaylistItemClickListener, MainActivity.OnRequestPermission {
@@ -145,19 +146,19 @@ public class PlaylistFragment extends BaseFragment<FragmentPlaylistBinding> impl
 
     @Override
     public void onItemPlaylistClickListener(Playlist playlist) {
-        if (playlist.getTitle() == "This device") {
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+
+        if (Objects.equals(playlist.getTitle(), "This device")) {
+
+            MainActivity mainActivity = (MainActivity) getActivity();
+            assert mainActivity != null;
+            mainActivity.setVisibility();
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, new ThisDeviceFragment(), null);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-            MainActivity mainActivity = (MainActivity) getActivity();
-            mainActivity.setVisibility();
-        } else {
-            return;
+
         }
-
-
     }
 
     @Override

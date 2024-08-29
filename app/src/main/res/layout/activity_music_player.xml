@@ -127,7 +127,7 @@
                         android:text="@{songPlaying.name}"
                         tools:text="@string/xuan_thi"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/_18sdp"
+                        android:textSize="@dimen/_18ssp"
                         android:textStyle="bold" />
 
                     <TextView

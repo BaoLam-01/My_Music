@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/add_account"
+            android:title="@string/add_account"
+            android:icon="@drawable/ic_add"/>
+        <item
+            android:id="@+id/news"
+            android:title="@string/news"
+            android:icon="@drawable/ic_new"/>
+        <item
+            android:id="@+id/history"
+            android:title="@string/content_listened_to"
+            android:icon="@drawable/ic_history"/>
+
+        <item
+            android:id="@+id/log_out"
+            android:title="@string/log_out"
+            android:icon="@drawable/ic_sign_out"/>
+    </group>
+</menu>
