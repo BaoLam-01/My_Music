@@ -40,7 +40,7 @@
     <string name="privacy">Privacy Policy</string>
     <string name="alrealy_have_an_account">Alrealy have an Account?</string>
     <string name="by_signin_up_you_agree_to_our">"By signin up you agree to our "</string>
-    <string name="and">and</string>
+    <string name="and">"and "</string>
     <string name="address">Address</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="register">Register</string>

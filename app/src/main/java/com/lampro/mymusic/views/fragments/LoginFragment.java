@@ -2,39 +2,27 @@ package com.lampro.mymusic.views.fragments;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-import static com.lampro.mymusic.constant.Constant.USER_NAME_KEY;
-
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentLoginBinding;
 import com.lampro.mymusic.utils.PrefManager;
 import com.lampro.mymusic.views.activities.MainActivity;
-
-import java.util.concurrent.Executor;
 
 import eightbitlab.com.blurview.RenderEffectBlur;
 
@@ -100,20 +88,35 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
         setBackgroundBlur();
 
 
-        String email = PrefManager.getEmail(USER_NAME_KEY);
-        if (email != null) {
+        String email = PrefManager.getEmail();
+        if (email != null &&!email.isEmpty()) {
             binding.edtEmailSI.setText(email);
         }
+        if (PrefManager.getRememberStatus()) {
+            String password = PrefManager.getPassword();
+            if (password != null &&!password.isEmpty()) {
+                binding.edtPwSI.setText(password);
+            }
+        }
 
-        if (mParam1 != null && mParam2 != null){
+
+        if (mParam1 != null && mParam2 != null) {
             binding.edtEmailSI.setText(mParam1);
             binding.edtPwSI.setText(mParam2);
+        }
+
+        Boolean rememberStatus = PrefManager.getRememberStatus();
+        if (rememberStatus) {
+            binding.cbRememberMe.setChecked(true);
+        } else {
+            binding.cbRememberMe.setChecked(false);
         }
     }
 
     private void listener() {
         binding.btnSU.setOnClickListener(this);
         binding.btnSI.setOnClickListener(this);
+        binding.btnFgPw.setOnClickListener(this);
     }
 
     @Override
@@ -128,7 +131,46 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
         if (v.getId() == binding.btnSI.getId()) {
             onClickSignIn();
         }
+        if (v.getId() == binding.btnFgPw.getId()) {
+            onClickForgotPassword();
+        }
     }
+
+    private void onClickForgotPassword() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String emailAddress = binding.edtEmailSI.getText().toString().trim();
+
+
+        if (emailAddress.isEmpty()) {
+            Toast.makeText(getContext(), "Username or password cannot be left blank!", LENGTH_SHORT).show();
+        } else {
+
+            if (emailAddress.length() < 11 || !emailAddress.endsWith("@gmail.com")) {
+                Toast.makeText(getContext(), "Email is not valid!", LENGTH_SHORT).show();
+            } else {
+                showLoadingDialog();
+                
+                auth.sendPasswordResetEmail(emailAddress)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getContext(), "Email sent", LENGTH_SHORT).show();
+                                    hideLoadingDialog();
+                                } else {
+                                    Toast.makeText(getInstance().getContext(), "Fail", LENGTH_SHORT).show();
+                                    hideLoadingDialog();
+                                }
+                            }
+                        });
+            }
+        }
+
+
+
+
+    }
+
 
     private void onClickSignIn() {
         String email = binding.edtEmailSI.getText().toString().trim();
@@ -161,7 +203,13 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
 
-                            PrefManager.saveEmail(USER_NAME_KEY, email);
+                            PrefManager.saveEmail(email);
+                            if (binding.cbRememberMe.isChecked()) {
+                                PrefManager.setRememberStatus(true);
+                                PrefManager.savePassword(password);
+                            } else {
+                                PrefManager.setRememberStatus(false);
+                            }
 
                             Intent intent = new Intent(getActivity(), MainActivity.class);
                             startActivity(intent);

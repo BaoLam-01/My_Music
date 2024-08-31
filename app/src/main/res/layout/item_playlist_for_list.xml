@@ -18,6 +18,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="@dimen/_50sdp"
             android:layout_height="@dimen/_50sdp"
+            android:background="@color/transparent"
             app:cardCornerRadius="@dimen/_5sdp">
 
             <ImageView
@@ -26,7 +27,7 @@
                 tools:src="@drawable/heart"
                 imageUrl="@{itemPlaylist.img}"
                 app:tint="#F23939"
-                android:background="#FFFFFF"
+                android:background="@color/white"
                 android:padding="@dimen/_10sdp"/>
         </androidx.cardview.widget.CardView>
 

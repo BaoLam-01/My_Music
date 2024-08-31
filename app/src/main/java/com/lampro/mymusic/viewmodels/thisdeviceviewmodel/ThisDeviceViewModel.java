@@ -13,6 +13,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ThisDeviceViewModel extends AndroidViewModel {
 
@@ -66,56 +68,61 @@ public class ThisDeviceViewModel extends AndroidViewModel {
 
             Long id = cursor.getLong(idColumn);
 
-            Long albumId = cursor.getLong(idAlbumColumn);
-
-
             String title = cursor.getString(titleColumn);
             String artist = cursor.getString(artistColumn);
             String album = cursor.getString(albumColumn);
             String duration = cursor.getString(durationColumn);
             String data = cursor.getString(dataColumn);
+            Long idAlbum = cursor.getLong(idAlbumColumn);
 
-            Uri getUri = getSongUri(getApplication(), id);
-            Bitmap img = getAlbumArt(String.valueOf(getUri));
 
-            songs.add(new Song(img, id, title, artist, album, duration, data, getUri));
+            String getUri = getSongUri(getApplication(), id);
+//            Bitmap img = getAlbumArt(contentResolver,getUri);
+
+
+            songs.add(new Song(null, id, title, artist, album, duration, data, getUri));
 
         } while (cursor.moveToNext());
         cursor.close();
         liveDataListSong.setValue(songs);
 
+
     }
 
-    private Uri getSongUri(Context context, Long songId) {
+
+    private String getSongUri(Context context, Long songId) {
         Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        return ContentUris.withAppendedId(contentUri, songId);
+        return ContentUris.withAppendedId(contentUri, songId).toString();
     }
 
-    private Uri getAlbumArtUri(Long albumId) {
-        Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
-        return ContentUris.withAppendedId(albumArtUri, albumId);
-    }
-    private Bitmap getAlbumArt(String filePath)  {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(filePath);
-            byte[] art = retriever.getEmbeddedPicture();
-            if (art != null) {
-                InputStream is = new ByteArrayInputStream(art);
-                return BitmapFactory.decodeStream(is);
-            } else {
-                // Trường hợp không có ảnh bìa
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
+
+    public Bitmap getAlbumArt(ContentResolver contentResolver,Uri filePath)  {
+        try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
             try {
-                retriever.release();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                retriever.setDataSource(Objects.requireNonNull(contentResolver.openAssetFileDescriptor(filePath, "r")).getFileDescriptor());
+                byte[] art = retriever.getEmbeddedPicture();
+                if (art != null) {
+                    return BitmapFactory.decodeByteArray(art, 0, art.length);
+                } else {
+                    // Trường hợp không có ảnh bìa
+                    return null;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                try {
+                    retriever.release();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
+
+    
+
 }

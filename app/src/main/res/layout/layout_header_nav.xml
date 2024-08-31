@@ -7,36 +7,37 @@
     </data>
 
     <LinearLayout
-        android:padding="20dp"
+        android:padding="@dimen/_20sdp"
         android:gravity="bottom"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="@dimen/_160sdp"
         android:background="@color/background_color_2">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/img_avatar"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/user_default" />
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_60sdp"
+            android:src="@drawable/user_default"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/tv_user_namne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/_8sdp"
             tools:text="Lampro"
             android:textStyle="bold"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textColor="@color/black"
+            android:textSize="@dimen/_16ssp" />
 
         <TextView
             android:id="@+id/tv_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="lampro@gmail.com"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:textColor="@color/black"
+            android:textSize="@dimen/_14ssp" />
 
     </LinearLayout>
 </layout>

@@ -64,11 +64,22 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+
 
     implementation ("com.airbnb.android:lottie:6.4.1")
 
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
 
+//    Room Database
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+
+//    Gson
+    implementation ("com.google.code.gson:gson:2.11.0")
 
 }
 

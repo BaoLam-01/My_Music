@@ -19,6 +19,7 @@ import com.lampro.mymusic.databinding.ActivitySplashBinding;
 
 public class Splash extends BaseActivity<ActivitySplashBinding> {
 
+    FirebaseUser user  = FirebaseAuth.getInstance().getCurrentUser();
     @Override
     protected ActivitySplashBinding inflateBinding() {
         return ActivitySplashBinding.inflate(getLayoutInflater());
@@ -34,18 +35,17 @@ public class Splash extends BaseActivity<ActivitySplashBinding> {
     }
 
     private void nextActivity() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
 //            chua log in
 
             Intent intent = new Intent(Splash.this, LoginAndRegisterActivity.class);
-            finish();
             startActivity(intent);
+            finish();
 
         } else {
             Intent intent = new Intent(Splash.this, MainActivity.class);
-            finish();
             startActivity(intent);
+            finish();
         }
     }
 

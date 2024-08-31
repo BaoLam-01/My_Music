@@ -2,16 +2,16 @@ package com.lampro.mymusic.model;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
 
 public class Song implements Parcelable {
+    private long id;
     private Bitmap img;
-    private Long id;
-    private String name, artist,album,duration,data;
-    private Uri uriSong;
+    private String name, artist, album, duration, data;
+    private String uriSong;
 
     public Song(Bitmap img, String name, String artist) {
         this.img = img;
@@ -19,7 +19,16 @@ public class Song implements Parcelable {
         this.artist = artist;
     }
 
-    public Song(Long id, String name, String artist, String album, String duration, String data) {
+    public Song(long id, String name, String artist, String album, String duration, String data) {
+        this.id = id;
+        this.name = name;
+        this.artist = artist;
+        this.album = album;
+        this.duration = duration;
+        this.data = data;
+    }
+
+    public Song(Bitmap img, long id, String name, String artist, String album, String duration, String data) {
         this.img = img;
         this.id = id;
         this.name = name;
@@ -29,17 +38,7 @@ public class Song implements Parcelable {
         this.data = data;
     }
 
-    public Song(Bitmap img, Long id, String name, String artist, String album, String duration, String data) {
-        this.img = img;
-        this.id = id;
-        this.name = name;
-        this.artist = artist;
-        this.album = album;
-        this.duration = duration;
-        this.data = data;
-    }
-
-    public Song(Bitmap img, Long id, String name, String artist, String album, String duration, String data, Uri uriSong) {
+    public Song(Bitmap img, long id, String name, String artist, String album, String duration, String data, String uriSong) {
         this.img = img;
         this.id = id;
         this.name = name;
@@ -52,18 +51,31 @@ public class Song implements Parcelable {
 
 
     protected Song(Parcel in) {
-        img = in.readParcelable(Uri.class.getClassLoader());
-        if (in.readByte() == 0) {
-            id = null;
-        } else {
-            id = in.readLong();
-        }
+        id = in.readLong();
+        img = in.readParcelable(Bitmap.class.getClassLoader());
         name = in.readString();
         artist = in.readString();
         album = in.readString();
         duration = in.readString();
         data = in.readString();
-        uriSong = in.readParcelable(Uri.class.getClassLoader());
+        uriSong = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeParcelable(img, flags);
+        dest.writeString(name);
+        dest.writeString(artist);
+        dest.writeString(album);
+        dest.writeString(duration);
+        dest.writeString(data);
+        dest.writeString(uriSong);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<Song> CREATOR = new Creator<Song>() {
@@ -102,11 +114,11 @@ public class Song implements Parcelable {
         this.artist = artist;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -116,14 +128,6 @@ public class Song implements Parcelable {
 
     public void setAlbum(String album) {
         this.album = album;
-    }
-
-    public String getTypeDuration() {
-        int dura = Integer.parseInt(duration);
-        int minute = (dura / 1000) / 60;
-        int second = (dura / 1000) % 60;
-        String duration = String.format("%02d:%02d", minute, second);
-        return duration;
     }
 
     public String getDuration() {
@@ -143,32 +147,21 @@ public class Song implements Parcelable {
     }
 
     public Uri getUriSong() {
-        return uriSong;
+
+        return Uri.parse(uriSong);
     }
 
-    public void setUriSong(Uri uriSong) {
+    public void setUriSong(String uriSong) {
         this.uriSong = uriSong;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+
+
+    public String getTypeDuration() {
+        int dura = Integer.parseInt(duration);
+        int minute = (dura / 1000) / 60;
+        int second = (dura / 1000) % 60;
+        return String.format("%02d:%02d", minute, second);
     }
 
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(img, flags);
-        if (id == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(id);
-        }
-        dest.writeString(name);
-        dest.writeString(artist);
-        dest.writeString(album);
-        dest.writeString(duration);
-        dest.writeString(data);
-        dest.writeParcelable(uriSong, flags);
-    }
 }

@@ -1,7 +1,5 @@
 package com.lampro.mymusic.model;
 
-import java.util.Date;
-
 public class Track {
     private int trackId;
     private String tittle;

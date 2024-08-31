@@ -62,9 +62,9 @@
 
                         <ImageView
                             android:id="@+id/img_song_playing"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:scaleType="fitStart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
                             imageBitmap="@{songPlaying.img}"
                             tools:ignore="ContentDescription" />
                     </androidx.cardview.widget.CardView>
@@ -173,12 +173,12 @@
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:layout_marginBottom="@dimen/_10sdp"
                     android:elevation="@dimen/_5sdp">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@color/transparent"
                         android:gravity="center_vertical">
 
                         <TextView

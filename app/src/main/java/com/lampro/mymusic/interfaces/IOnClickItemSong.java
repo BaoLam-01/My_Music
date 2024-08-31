@@ -7,5 +7,5 @@ import com.lampro.mymusic.model.Song;
 import java.util.List;
 
 public interface IOnClickItemSong {
-    void playSong(List<Song> listSong, int position);
+    void playSong(String listSong,int position);
 }

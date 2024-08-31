@@ -1,5 +1,6 @@
 package com.lampro.mymusic.views.activities;
 
+import static com.lampro.mymusic.utils.BindingUtils.loadUserCircleImg;
 import static com.lampro.mymusic.utils.MusicService.CLEAR;
 import static com.lampro.mymusic.utils.MusicService.MUTED;
 import static com.lampro.mymusic.utils.MusicService.PAUSE;
@@ -46,6 +47,8 @@ import androidx.viewbinding.ViewBinding;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -85,7 +88,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
     private boolean isMuted = false;
 
 
-    private List<Song> playlistPlaying;
+    private String listSongPlaying;
     private int positionPlaying;
     private Song songPlaying;
     private boolean isPlaying;
@@ -143,6 +146,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         initView();
         listener();
+        bottomNav.setSelectedItemId(R.id.discover);
 
 
         getResult = registerForActivityResult(
@@ -204,8 +208,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         String email = user.getEmail();
         Uri photoUrl = user.getPhotoUrl();
 
-
-        tvName.setVisibility(View.VISIBLE);
         tvName.setText(userName);
         tvEmail.setText(email);
         Glide.with(this).load(photoUrl).error(R.drawable.user_default).into(imgAvata);
@@ -454,7 +456,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
 
         if (requestCode == REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startSong(playlistPlaying, positionPlaying);
+                startSong();
             }
         }
 
@@ -473,7 +475,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                                 Manifest.permission.POST_NOTIFICATIONS},
                         REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
             } else {
-                startSong(playlistPlaying, positionPlaying);
+                startSong();
             }
         } else {
             // Đối với Android 10 đến 12
@@ -482,27 +484,27 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         REQUEST_FOREGROUND_SERVICE_MEDIA_PLAYBACK);
             } else {
-                startSong(playlistPlaying, positionPlaying);
+                startSong();
             }
         }
     }
 
     @Override
-    public void playSong(List<Song> listSong, int position) {
+    public void playSong(String listSong, int position) {
 
-        playlistPlaying = listSong;
+        listSongPlaying = listSong;
         positionPlaying = position;
         checkSelfPermissionPlayMusic();
 
     }
 
 
-    private void startSong(List<Song> listSong, int position) {
+    private void startSong() {
         Intent intent = new Intent(this, MusicService.class);
         intent.setAction(START);
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("listSong", (ArrayList<? extends Parcelable>) listSong);
-        bundle.putInt("position", position);
+        bundle.putInt("position", positionPlaying);
+        bundle.putString("listSong", listSongPlaying);
         intent.putExtras(bundle);
         startService(intent);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);

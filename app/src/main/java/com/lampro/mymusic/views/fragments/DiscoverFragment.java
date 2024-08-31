@@ -157,7 +157,7 @@ public class DiscoverFragment extends BaseFragment<FragmentDiscoverBinding> impl
 
 
     @Override
-    public void playSong(List<Song> listSong, int position) {
+    public void playSong(String listSong, int position) {
 
     }
 }

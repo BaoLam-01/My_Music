@@ -185,10 +185,6 @@ public class MusicPlayerActivity extends BaseActivity<ActivityMusicPlayerBinding
 
             binding.setSongPlaying(songPlaying);
 
-            if (songPlaying.getImg() != null) {
-                binding.imgBgMusicPlaying.setImageBitmap(songPlaying.getImg());
-            } else
-                binding.imgBgMusicPlaying.setImageResource(R.drawable.img_bg_music_playing);
         }
     }
 
