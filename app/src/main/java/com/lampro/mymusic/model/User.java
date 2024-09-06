@@ -1,23 +1,26 @@
 package com.lampro.mymusic.model;
 
 public class User {
-    private int userId;
+    private String userId;
     private String userName;
     private String email;
     private String password;
 
-    public User(int userId, String userName, String email, String password) {
+    public User() {
+    }
+
+    public User(String userId, String userName, String email, String password) {
         this.userId = userId;
         this.userName = userName;
         this.email = email;
         this.password = password;
     }
 
-    public int getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

@@ -5,6 +5,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static androidx.fragment.app.FragmentManager.TAG;
 
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,15 +23,31 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentRegisterBinding;
+import com.lampro.mymusic.model.User;
+import com.lampro.mymusic.viewmodels.registerviewmodel.RegisterViewModel;
+import com.lampro.mymusic.viewmodels.registerviewmodel.RegisterViewModelFactory;
+import com.lampro.mymusic.viewmodels.thisdeviceviewmodel.ThisDeviceViewModel;
+import com.lampro.mymusic.viewmodels.thisdeviceviewmodel.ThisDeviceViewModelFactory;
 import com.lampro.mymusic.views.activities.MainActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import eightbitlab.com.blurview.RenderEffectBlur;
@@ -44,6 +62,10 @@ public class RegisterFragment extends BaseFragment<FragmentRegisterBinding> impl
     private String mParam1;
     private String mParam2;
 
+    private RegisterViewModel mRegisterViewModel;
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference userRef = firebaseDatabase.getReference("List User");
+    private List<User> listUser = new ArrayList<>();
 
 
     public RegisterFragment() {
@@ -73,6 +95,7 @@ public class RegisterFragment extends BaseFragment<FragmentRegisterBinding> impl
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
 
@@ -86,12 +109,25 @@ public class RegisterFragment extends BaseFragment<FragmentRegisterBinding> impl
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        initViewModel();
+        mRegisterViewModel.getListUser();
+
+        mRegisterViewModel.listUserLiveData.observe(getViewLifecycleOwner(), users -> {
+            listUser = users;
+        });
+
         initUi();
         listener();
     }
 
     private void initUi() {
         setBackgroundBlur();
+    }
+
+    private void initViewModel() {
+        Application application = getActivity().getApplication();
+        RegisterViewModelFactory registerViewModelFactory = new RegisterViewModelFactory(application);
+        mRegisterViewModel = new ViewModelProvider(this, registerViewModelFactory).get(RegisterViewModel.class);
     }
 
     private void setBackgroundBlur() {
@@ -143,17 +179,20 @@ public class RegisterFragment extends BaseFragment<FragmentRegisterBinding> impl
 
                     Toast.makeText(getContext(), "Email is not valid!", LENGTH_SHORT).show();
 
-//                    } else if (checkEmail(edtEmailSU.getText().toString().trim())) {
-//
-//                        Toast.makeText(getContext(), "Email already exists, please enter another email!", LENGTH_SHORT).show();
-
                 } else if (password.length() < 6 || password.contains(" ")) {
                     Toast.makeText(getContext(), "Password must be more than 6 characters and " +
                             "cannot contain spaces!", LENGTH_SHORT).show();
                 } else if (!cfPassword.equals(password)) {
                     Toast.makeText(getContext(), "Passwords do not match!", LENGTH_SHORT).show();
                 } else {
-                    register(email,password);
+                    if (checkIsExist(email)) {
+
+                        Toast.makeText(getContext(), "Email already exists, please enter another email!", LENGTH_SHORT).show();
+                    } else {
+
+                        register(email, password);
+                    }
+
                 }
             }
         }
@@ -161,31 +200,42 @@ public class RegisterFragment extends BaseFragment<FragmentRegisterBinding> impl
 
     private void register(String email, String password) {
         showLoadingDialog();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(requireActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Toast.makeText(getContext(), "Register success", LENGTH_SHORT).show();
-                            goToLognin(email,password);
-                            hideLoadingDialog();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(getContext(), "Register fail" + task.toString(), LENGTH_SHORT).show();
-                            goToLognin(email,password);
-                            hideLoadingDialog();
-                        }
-                    }
-                });
+        mRegisterViewModel.register(email,password);
+        mRegisterViewModel.taskResult.observe(getViewLifecycleOwner(),authResultTask -> {
+            if (authResultTask.isSuccessful()) {
 
+                Toast.makeText(getContext(), "Register success", LENGTH_SHORT).show();
+                goToLognin(email, password);
+                hideLoadingDialog();
+            } else {
+                Toast.makeText(getContext(), "Registration failed please try again", LENGTH_SHORT).show();
+                hideLoadingDialog();
+            }
+        });
+
+
+    }
+
+    private Boolean checkIsExist(String email) {
+        Boolean isExist = false;
+        if (listUser == null || listUser.isEmpty() || email.isEmpty()) {
+            return isExist;
+        }
+        for (User user : listUser) {
+            if (Objects.equals(user.getEmail(), email)) {
+                isExist = true;
+                break;
+            } else {
+                isExist = false;
+            }
+        }
+        return isExist;
     }
 
     private void goToLognin(String email, String password) {
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fr_container, LoginFragment.newInstance(email,password))
+                .replace(R.id.fr_container, LoginFragment.newInstance(email, password))
                 .commit();
 
     }

@@ -7,14 +7,21 @@ public class Track {
     private int albumId;
     private long duration;
     private String releaseDate;
+    private String uriSong;
+    private String img;
 
-    public Track(int trackId, String tittle, int artistId, int albumId, long duration, String releaseDate) {
+    public Track() {
+    }
+
+    public Track(int trackId, String tittle, int artistId, int albumId, long duration, String releaseDate, String uriSong, String img) {
         this.trackId = trackId;
         this.tittle = tittle;
         this.artistId = artistId;
         this.albumId = albumId;
         this.duration = duration;
         this.releaseDate = releaseDate;
+        this.uriSong = uriSong;
+        this.img = img;
     }
 
     public int getTrackId() {
@@ -63,5 +70,21 @@ public class Track {
 
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public String getUriSong() {
+        return uriSong;
+    }
+
+    public void setUriSong(String uriSong) {
+        this.uriSong = uriSong;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 }

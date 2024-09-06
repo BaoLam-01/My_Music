@@ -2,6 +2,7 @@ package com.lampro.mymusic.views.fragments;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +20,20 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.lampro.mymusic.R;
 import com.lampro.mymusic.base.BaseFragment;
 import com.lampro.mymusic.databinding.FragmentLoginBinding;
+import com.lampro.mymusic.model.User;
 import com.lampro.mymusic.utils.PrefManager;
+import com.lampro.mymusic.viewmodels.loginviewmodel.LoginViewModel;
+import com.lampro.mymusic.viewmodels.loginviewmodel.LoginViewModelFactory;
 import com.lampro.mymusic.views.activities.MainActivity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import eightbitlab.com.blurview.RenderEffectBlur;
 
@@ -37,6 +48,12 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
 
     private String mParam1;
     private String mParam2;
+
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference userRef = firebaseDatabase.getReference("List User");
+    private List<User> listUser = new ArrayList<>();
+
+    private LoginViewModel mloginViewModel;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -70,6 +87,13 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
 
     }
 
+
+    private void initViewModel() {
+        Application application = requireActivity().getApplication();
+        LoginViewModelFactory loginViewModelFactory = new LoginViewModelFactory(application);
+        mloginViewModel = new ViewModelProvider(this, loginViewModelFactory).get(LoginViewModel.class);
+    }
+
     @Override
     protected FragmentLoginBinding inflateBinding() {
         return FragmentLoginBinding.inflate(getLayoutInflater());
@@ -78,6 +102,13 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initViewModel();
+        mloginViewModel.getListUser();
+
+        mloginViewModel.listUserLiveData.observe(getViewLifecycleOwner(), users -> {
+            listUser = users;
+        });
+
 
         initUI();
 
@@ -89,12 +120,12 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
 
 
         String email = PrefManager.getEmail();
-        if (email != null &&!email.isEmpty()) {
+        if (email != null && !email.isEmpty()) {
             binding.edtEmailSI.setText(email);
         }
         if (PrefManager.getRememberStatus()) {
             String password = PrefManager.getPassword();
-            if (password != null &&!password.isEmpty()) {
+            if (password != null && !password.isEmpty()) {
                 binding.edtPwSI.setText(password);
             }
         }
@@ -137,9 +168,8 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
     }
 
     private void onClickForgotPassword() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        String emailAddress = binding.edtEmailSI.getText().toString().trim();
 
+        String emailAddress = binding.edtEmailSI.getText().toString().trim();
 
         if (emailAddress.isEmpty()) {
             Toast.makeText(getContext(), "Username or password cannot be left blank!", LENGTH_SHORT).show();
@@ -147,26 +177,24 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
 
             if (emailAddress.length() < 11 || !emailAddress.endsWith("@gmail.com")) {
                 Toast.makeText(getContext(), "Email is not valid!", LENGTH_SHORT).show();
+            } else if (!checkEmailExist(emailAddress)) {
+                Toast.makeText(getContext(), "Account not registered please try again", LENGTH_SHORT).show();
             } else {
+
                 showLoadingDialog();
-                
-                auth.sendPasswordResetEmail(emailAddress)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getContext(), "Email sent", LENGTH_SHORT).show();
-                                    hideLoadingDialog();
-                                } else {
-                                    Toast.makeText(getInstance().getContext(), "Fail", LENGTH_SHORT).show();
-                                    hideLoadingDialog();
-                                }
-                            }
-                        });
+                mloginViewModel.resetPassword(emailAddress);
+                mloginViewModel.taskResetPasswordResult.observe(getViewLifecycleOwner(), voidTask -> {
+                    if (voidTask.isSuccessful()) {
+                        Toast.makeText(getContext(), "Email sent", LENGTH_SHORT).show();
+                        hideLoadingDialog();
+                    }else {
+                        Toast.makeText(getInstance().getContext(), "Email sent failed", LENGTH_SHORT).show();
+                        hideLoadingDialog();
+                    }
+                });
+
             }
         }
-
-
 
 
     }
@@ -194,35 +222,48 @@ public class LoginFragment extends BaseFragment<FragmentLoginBinding> implements
     }
 
     private void login(String email, String password) {
+
         showLoadingDialog();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(requireActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
 
-                            PrefManager.saveEmail(email);
-                            if (binding.cbRememberMe.isChecked()) {
-                                PrefManager.setRememberStatus(true);
-                                PrefManager.savePassword(password);
-                            } else {
-                                PrefManager.setRememberStatus(false);
-                            }
+         mloginViewModel.login(email, password);
+         mloginViewModel.taskLoginResult.observe(getViewLifecycleOwner(), authResultTask -> {
+             if (authResultTask.isSuccessful()) {
+                 PrefManager.saveEmail(email);
+                 if (binding.cbRememberMe.isChecked()) {
+                     PrefManager.setRememberStatus(true);
+                     PrefManager.savePassword(password);
+                 } else {
+                     PrefManager.setRememberStatus(false);
+                 }
 
-                            Intent intent = new Intent(getActivity(), MainActivity.class);
-                            startActivity(intent);
-                            requireActivity().finishAffinity();
-                            hideLoadingDialog();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(getContext(), "Authentication failed." + task.toString(),
-                                    Toast.LENGTH_SHORT).show();
-                            hideLoadingDialog();
-                        }
-                    }
-                });
+                 Intent intent = new Intent(getActivity(), MainActivity.class);
+                 startActivity(intent);
+                 requireActivity().finishAffinity();
+                 hideLoadingDialog();
+             }else {
+                 // If sign in fails, display a message to the user.
+                 Toast.makeText(getContext(), "Wrong username or password please try again.",
+                         Toast.LENGTH_SHORT).show();
+                 hideLoadingDialog();
+             }
+         });
+
+    }
+
+    private Boolean checkEmailExist(String email) {
+        Boolean isExist = false;
+        if (listUser == null || listUser.isEmpty() || email.isEmpty()) {
+            return isExist;
+        }
+        for (User user : listUser) {
+            if (Objects.equals(user.getEmail(), email)) {
+                isExist = true;
+                break;
+            } else {
+                isExist = false;
+            }
+        }
+        return isExist;
     }
 
     private void setBackgroundBlur() {

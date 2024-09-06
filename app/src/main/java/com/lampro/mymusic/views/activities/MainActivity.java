@@ -356,6 +356,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
         } else if (id == R.id.history) {
 
         } else {
+            stopService(new Intent(this, MusicService.class));
             FirebaseAuth.getInstance().signOut();
             goToLogin();
         }
